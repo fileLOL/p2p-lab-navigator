@@ -94,7 +94,15 @@ export const changeSubscriptionPlan = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     if (!ALLOWED_PRICE_IDS.has(data.priceId)) throw new Error("Plan no válido.");
-    const row = await getCurrentSubscription(context.supabase, context.userId, data.environment);
+    const { data: row, error } = await context.supabase
+      .from("subscriptions")
+      .select(SUBSCRIPTION_COLUMNS)
+      .eq("user_id", context.userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
     if (!row || row.status === "canceled") {
       throw new Error("No tienes ninguna suscripción activa que cambiar.");
     }
