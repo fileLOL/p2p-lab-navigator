@@ -24,6 +24,7 @@ export function usePaddleCheckout() {
         customData: { userId: options.userId },
         settings: {
           displayMode: "overlay",
+          locale: "es",
           successUrl: options.successUrl ?? `${window.location.origin}/planes?checkout=ok`,
           allowLogout: false,
           variant: "one-page",

@@ -25,7 +25,7 @@ export async function initializePaddle(): Promise<void> {
     script.onload = () => {
       const jsEnv = getPaddleEnvironment() === "sandbox" ? "sandbox" : "production";
       window.Paddle.Environment.set(jsEnv);
-      window.Paddle.Initialize({ token: clientToken });
+      window.Paddle.Initialize({ token: clientToken, checkout: { settings: { locale: "es" } } });
       paddleInitialized = true;
       resolve();
     };
