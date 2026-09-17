@@ -52,6 +52,10 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
 }
 
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
+  const item = data.items?.[0];
+  const priceId = item?.price?.importMeta?.externalId;
+  const productId = item?.product?.importMeta?.externalId;
+
   await getSupabase()
     .from("subscriptions")
     .update({
@@ -59,6 +63,10 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
       current_period_start: data.currentBillingPeriod?.startsAt ?? null,
       current_period_end: data.currentBillingPeriod?.endsAt ?? null,
       cancel_at_period_end: data.scheduledChange?.action === "cancel",
+      // Un cambio Mensual↔Anual programado llega como "updated" con los nuevos
+      // items cuando entra en vigor en la renovación: sincronizamos el precio.
+      ...(priceId ? { price_id: priceId } : {}),
+      ...(productId ? { product_id: productId } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("paddle_subscription_id", data.id)
