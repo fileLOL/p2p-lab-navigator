@@ -38,6 +38,17 @@ function StatsPage() {
     data.trades.map((t) => ({ side: t.side, realizedPnl: t.realized_pnl, total: t.total, asset: t.asset })),
   );
 
+  const buys = data.trades.filter((t) => t.side === "buy").length;
+  const volume = data.trades.reduce((acc, t) => acc + t.total, 0);
+  const assetMap = new Map<string, { asset: string; realizedPnl: number; trades: number }>();
+  for (const t of data.trades) {
+    const entry = assetMap.get(t.asset) ?? { asset: t.asset, realizedPnl: 0, trades: 0 };
+    entry.realizedPnl += t.side === "sell" ? t.realized_pnl : 0;
+    entry.trades += 1;
+    assetMap.set(t.asset, entry);
+  }
+  const byAsset = [...assetMap.values()].sort((a, b) => b.trades - a.trades);
+
   return (
     <AppShell title="Estadísticas" subtitle="Cómo está rindiendo tu simulación">
       <div className="space-y-5">
