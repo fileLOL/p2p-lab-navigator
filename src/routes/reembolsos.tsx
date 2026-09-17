@@ -62,55 +62,27 @@ function ReembolsosPage() {
 
             <Section title="Cómo solicitar un reembolso">
               <p>
-                Los reembolsos los gestiona nuestro proveedor de pagos, Paddle, que actúa como
-                Merchant of Record. Para solicitar un reembolso:
+                Los reembolsos los gestiona nuestro proveedor de pagos. Para solicitar un
+                reembolso:
               </p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>
-                  visita{" "}
-                  <a
-                    href="https://paddle.net"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    paddle.net
-                  </a>{" "}
-                  e indica el correo con el que compraste, o
+                  abre el portal de facturación desde la sección de planes (botón «Gestionar
+                  suscripción») e indica el correo con el que compraste, o
                 </li>
                 <li>contacta con nuestro equipo de soporte y gestionaremos la solicitud.</li>
               </ul>
+              <p>
+                Tramitamos los reembolsos dentro de los 30 días posteriores al cobro y el
+                abono llega al mismo método de pago que usaste al comprar.
+              </p>
             </Section>
 
             <Section title="Cancelaciones">
               <p>
                 Cancelar tu suscripción no es lo mismo que pedir un reembolso: al cancelar, dejas
                 de renovar y mantienes el acceso hasta el final del periodo ya pagado. Puedes
-                cancelar desde la sección de planes o a través de{" "}
-                <a
-                  href="https://paddle.net"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  paddle.net
-                </a>
-                .
-              </p>
-            </Section>
-
-            <Section title="Más información">
-              <p>
-                El tratamiento de los reembolsos se rige también por la{" "}
-                <a
-                  href="https://www.paddle.com/legal/refund-policy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Política de Reembolsos de Paddle
-                </a>
-                .
+                cancelar desde la sección de planes o desde el portal de facturación.
               </p>
             </Section>
           </CardContent>
