@@ -435,8 +435,13 @@ export const changePlan = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { data: quota, error } = await context.supabase.rpc("change_plan", { _plan: data.plan });
-    if (error) throw new Error(error.message);
-    return { quota: quota as unknown as QuotaState, paymentSimulated: data.plan !== "free" };
+    if (error) {
+      if (error.message.includes("plan_requires_payment")) {
+        throw new Error("Los planes de pago se activan al completar el pago.");
+      }
+      throw new Error(error.message);
+    }
+    return { quota: quota as unknown as QuotaState };
   });
 
 // ---------- Perfil y cuenta ----------
