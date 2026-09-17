@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
+import { createStripeClient, verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
 
 // Stripe (managed payments) webhook receiver — handles customer.subscription.* events.
 
@@ -90,10 +90,24 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+/**
+ * Respaldo: si customer.subscription.created se perdió, el evento de sesión
+ * completada recupera la suscripción desde Stripe y la registra igualmente.
+ */
+async function handleCheckoutSessionCompleted(session: any, env: StripeEnv) {
+  if (session.mode !== "subscription" || !session.subscription) return;
+  const stripe = createStripeClient(env);
+  const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+  await handleSubscriptionCreated(subscription, env);
+}
+
 async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
 
   switch (event.type) {
+    case "checkout.session.completed":
+      await handleCheckoutSessionCompleted(event.data.object, env);
+      break;
     case "customer.subscription.created":
       await handleSubscriptionCreated(event.data.object, env);
       break;
