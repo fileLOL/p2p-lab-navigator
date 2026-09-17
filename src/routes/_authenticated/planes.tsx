@@ -125,6 +125,20 @@ function PlansPage() {
     }
   };
 
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (autoStarted.current || !user) return;
+    const requested = new URLSearchParams(window.location.search).get("checkout");
+    const match = (Object.keys(PRICE_IDS) as Exclude<PlanId, "free">[]).find(
+      (key) => PRICE_IDS[key] === requested,
+    );
+    if (!match) return;
+    autoStarted.current = true;
+    void buy(match);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">
