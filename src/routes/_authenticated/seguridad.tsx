@@ -45,7 +45,7 @@ function SecurityPage() {
 
   const displayName = name ?? data?.profile?.display_name ?? "";
 
-  const audit = useQuery({ queryKey: ["audit"], queryFn: () => auditFn({ data: { limit: 20 } }) });
+  const audit = useQuery({ queryKey: ["audit"], queryFn: () => auditFn() });
 
   const saveProfile = useMutation({
     mutationFn: () => updateFn({ data: { displayName } }),
