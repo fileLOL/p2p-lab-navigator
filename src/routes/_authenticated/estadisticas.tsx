@@ -50,7 +50,7 @@ function StatsPage() {
           />
           <MetricCard
             label="Ratio de acierto"
-            value={stats.closedTrades > 0 ? `${stats.winRate.toFixed(1)} %` : "—"}
+            value={stats.closedTrades > 0 ? `${stats.winRatePct.toFixed(1)} %` : "—"}
             hint={`${stats.wins} ganadoras / ${stats.losses} perdedoras`}
           />
           <MetricCard
@@ -65,24 +65,30 @@ function StatsPage() {
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Resumen de actividad</p>
             <dl className="mt-3 space-y-2 text-sm">
               <Row label="Operaciones totales" value={String(stats.totalTrades)} />
-              <Row label="Compras" value={String(stats.buys)} />
-              <Row label="Ventas" value={String(stats.sells)} />
-              <Row label="Volumen simulado" value={formatMoney(stats.volume)} />
-              <Row label="Mejor operación" value={stats.bestTrade === null ? "—" : formatMoney(stats.bestTrade)} />
-              <Row label="Peor operación" value={stats.worstTrade === null ? "—" : formatMoney(stats.worstTrade)} />
+              <Row label="Compras" value={String(buys)} />
+              <Row label="Ventas" value={String(stats.closedTrades)} />
+              <Row label="Volumen simulado" value={formatMoney(volume)} />
+              <Row
+                label="Mejor operación"
+                value={stats.bestTrade === null ? "—" : formatMoney(stats.bestTrade.realizedPnl)}
+              />
+              <Row
+                label="Peor operación"
+                value={stats.worstTrade === null ? "—" : formatMoney(stats.worstTrade.realizedPnl)}
+              />
             </dl>
           </div>
 
           <div className="surface-card p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Resultado por activo</p>
-            {stats.byAsset.length === 0 ? (
+            {byAsset.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-10 text-center">
                 <BarChart3 className="size-6 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">Aún no hay operaciones cerradas.</p>
               </div>
             ) : (
               <dl className="mt-3 space-y-2 text-sm">
-                {stats.byAsset.map((a) => (
+                {byAsset.map((a) => (
                   <div key={a.asset} className="flex items-center justify-between">
                     <dt>{a.asset}</dt>
                     <dd className={`num ${a.realizedPnl >= 0 ? "text-success" : "text-destructive"}`}>
