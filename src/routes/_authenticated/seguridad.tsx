@@ -111,11 +111,11 @@ function SecurityPage() {
           <h2 className="font-display text-base font-semibold">Actividad reciente</h2>
           {audit.isLoading ? (
             <p className="mt-2 text-sm text-muted-foreground">Cargando actividad...</p>
-          ) : !audit.data || audit.data.entries.length === 0 ? (
+          ) : !audit.data || audit.data.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">No hay actividad registrada todavía.</p>
           ) : (
             <ul className="mt-3 space-y-2 text-sm">
-              {audit.data.entries.map((entry) => (
+              {audit.data.map((entry) => (
                 <li key={entry.id} className="flex items-center justify-between gap-3 border-b border-border/60 pb-2 last:border-0">
                   <span>{actionLabel(entry.action)}</span>
                   <span className="text-xs text-muted-foreground">
