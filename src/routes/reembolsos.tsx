@@ -8,13 +8,13 @@ export const Route = createFileRoute("/reembolsos")({
       {
         name: "description",
         content:
-          "Política de reembolsos de P2P Lab: garantía de devolución de 30 días gestionada a través de Paddle.",
+          "Política de reembolsos de P2P Lab: garantía de devolución de 30 días gestionada a través de nuestro proveedor de pagos.",
       },
       { property: "og:title", content: "Política de Reembolsos — P2P Lab" },
       {
         property: "og:description",
         content:
-          "Cómo solicitar un reembolso de tu suscripción a P2P Lab: garantía de 30 días a través de paddle.net.",
+          "Cómo solicitar un reembolso de tu suscripción a P2P Lab: garantía de 30 días desde la sección de planes.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
