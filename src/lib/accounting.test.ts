@@ -4,7 +4,14 @@ import { computePortfolio, computeTradeStats, quoteBuy, quoteSell } from "./acco
 
 describe("computePortfolio", () => {
   it("empieza con 20 € de capital y ROI 0", () => {
-    const result = computePortfolio({ initialCapital: 20, cash: 20, positions: [], prices: {}, realizedPnl: 0, peakEquity: 20 });
+    const result = computePortfolio({
+      initialCapital: 20,
+      cash: 20,
+      positions: [],
+      prices: {},
+      realizedPnl: 0,
+      peakEquity: 20,
+    });
     expect(result.equity).toBe(20);
     expect(result.investedCost).toBe(0);
     expect(result.roiPct).toBe(0);

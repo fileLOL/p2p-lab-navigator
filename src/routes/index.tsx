@@ -15,7 +15,10 @@ export const Route = createFileRoute("/")({
         content:
           "Compara ofertas P2P de criptomonedas de varias plataformas y practica con 20 € de capital virtual. Sin custodia de fondos y sin riesgo.",
       },
-      { property: "og:title", content: "P2P Lab — Analiza oportunidades P2P y practica sin riesgo" },
+      {
+        property: "og:title",
+        content: "P2P Lab — Analiza oportunidades P2P y practica sin riesgo",
+      },
       {
         property: "og:description",
         content: "Compara ofertas P2P de criptomonedas y practica con capital virtual.",
@@ -36,7 +39,13 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
         <div className="flex items-center gap-2">
-          <img src="/icons/icon-192.png" alt="" width={32} height={32} className="size-8 rounded-lg" />
+          <img
+            src="/icons/icon-192.png"
+            alt=""
+            width={32}
+            height={32}
+            className="size-8 rounded-lg"
+          />
           <span className="font-display text-lg font-semibold">P2P Lab</span>
         </div>
         <nav className="flex items-center gap-2">
@@ -56,8 +65,8 @@ function Landing() {
               P2P Lab
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-              Analiza oportunidades de compra y venta P2P de criptomonedas en varias plataformas y practica con capital
-              virtual antes de arriesgar dinero real.
+              Analiza oportunidades de compra y venta P2P de criptomonedas en varias plataformas y
+              practica con capital virtual antes de arriesgar dinero real.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -115,7 +124,8 @@ function Landing() {
         <section className="mx-auto max-w-6xl px-4 py-16">
           <h2 className="font-display text-2xl font-semibold">Planes</h2>
           <p className="mt-2 text-muted-foreground">
-            El paper trading es ilimitado en todos los planes. Lo que cambia es tu cuota diaria de búsquedas.
+            El paper trading es ilimitado en todos los planes. Lo que cambia es tu cuota diaria de
+            búsquedas.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {(["free", "monthly", "yearly"] as const).map((id) => {
@@ -125,7 +135,9 @@ function Landing() {
                   <p className="font-display text-lg font-semibold">{plan.name}</p>
                   <p className="num mt-1 text-3xl font-semibold">
                     {plan.price}
-                    <span className="ml-1 text-sm font-normal text-muted-foreground">{plan.priceDetail}</span>
+                    <span className="ml-1 text-sm font-normal text-muted-foreground">
+                      {plan.priceDetail}
+                    </span>
                   </p>
                   <ul className="mt-4 space-y-2 text-sm">
                     {plan.features.map((f) => (
@@ -135,7 +147,11 @@ function Landing() {
                       </li>
                     ))}
                   </ul>
-                  <Button asChild className="mt-5 w-full" variant={id === "monthly" ? "default" : "outline"}>
+                  <Button
+                    asChild
+                    className="mt-5 w-full"
+                    variant={id === "monthly" ? "default" : "outline"}
+                  >
                     <Link to={ctaTo}>{id === "free" ? "Empezar gratis" : "Probar este plan"}</Link>
                   </Button>
                 </article>
@@ -163,7 +179,9 @@ function Landing() {
       <footer className="border-t border-border">
         <div className="mx-auto max-w-6xl space-y-2 px-4 py-8 text-xs text-muted-foreground">
           <p>{GENERAL_DISCLAIMER}</p>
-          <p>© {new Date().getFullYear()} P2P Lab. Herramienta educativa de análisis y simulación.</p>
+          <p>
+            © {new Date().getFullYear()} P2P Lab. Herramienta educativa de análisis y simulación.
+          </p>
         </div>
       </footer>
     </div>
@@ -173,7 +191,9 @@ function Landing() {
 function Step({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <article className="surface-card p-5">
-      <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">{icon}</div>
+      <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+        {icon}
+      </div>
       <h3 className="mt-3 font-display text-base font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{text}</p>
     </article>

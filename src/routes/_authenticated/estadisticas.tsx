@@ -10,7 +10,10 @@ export const Route = createFileRoute("/_authenticated/estadisticas")({
   head: () => ({
     meta: [
       { title: "Estadísticas — P2P Lab" },
-      { name: "description", content: "Rentabilidad, ratio de acierto, drawdown y desglose por activo de tu simulación." },
+      {
+        name: "description",
+        content: "Rentabilidad, ratio de acierto, drawdown y desglose por activo de tu simulación.",
+      },
       { property: "og:title", content: "Estadísticas — P2P Lab" },
       { property: "og:description", content: "Rendimiento detallado de tu cartera simulada." },
       { name: "robots", content: "noindex" },
@@ -35,7 +38,12 @@ function StatsPage() {
   if (!data) return null;
 
   const stats = computeTradeStats(
-    data.trades.map((t) => ({ side: t.side, realizedPnl: t.realized_pnl, total: t.total, asset: t.asset })),
+    data.trades.map((t) => ({
+      side: t.side,
+      realizedPnl: t.realized_pnl,
+      total: t.total,
+      asset: t.asset,
+    })),
   );
 
   const buys = data.trades.filter((t) => t.side === "buy").length;
@@ -53,7 +61,11 @@ function StatsPage() {
     <AppShell title="Estadísticas" subtitle="Cómo está rindiendo tu simulación">
       <div className="space-y-5">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard label="ROI" value={formatPct(data.metrics.roi_pct)} tone={toneOf(data.metrics.roi_pct)} />
+          <MetricCard
+            label="ROI"
+            value={formatPct(data.metrics.roi_pct)}
+            tone={toneOf(data.metrics.roi_pct)}
+          />
           <MetricCard
             label="Beneficio total"
             value={formatMoney(data.metrics.total_pnl)}
@@ -73,7 +85,9 @@ function StatsPage() {
 
         <div className="grid gap-3 lg:grid-cols-2">
           <div className="surface-card p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Resumen de actividad</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Resumen de actividad
+            </p>
             <dl className="mt-3 space-y-2 text-sm">
               <Row label="Operaciones totales" value={String(stats.totalTrades)} />
               <Row label="Compras" value={String(buys)} />
@@ -91,7 +105,9 @@ function StatsPage() {
           </div>
 
           <div className="surface-card p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Resultado por activo</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Resultado por activo
+            </p>
             {byAsset.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-10 text-center">
                 <BarChart3 className="size-6 text-muted-foreground" />
@@ -102,7 +118,9 @@ function StatsPage() {
                 {byAsset.map((a) => (
                   <div key={a.asset} className="flex items-center justify-between">
                     <dt>{a.asset}</dt>
-                    <dd className={`num ${a.realizedPnl >= 0 ? "text-success" : "text-destructive"}`}>
+                    <dd
+                      className={`num ${a.realizedPnl >= 0 ? "text-success" : "text-destructive"}`}
+                    >
                       {formatMoney(a.realizedPnl)} · {a.trades} ops
                     </dd>
                   </div>

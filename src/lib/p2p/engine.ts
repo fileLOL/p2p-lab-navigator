@@ -40,7 +40,8 @@ export function normalizeOffers(
   const normalized = offers.map((offer) => {
     const { spread, spreadPct } = computeSpread(offer, referencePrice);
     const spreadScore = spreadPct === null ? 0 : Math.max(-5, Math.min(5, spreadPct)) / 5;
-    const score = spreadScore * 0.6 + amountFit(offer, params.amount) * 0.25 + freshness(offer, now) * 0.15;
+    const score =
+      spreadScore * 0.6 + amountFit(offer, params.amount) * 0.25 + freshness(offer, now) * 0.15;
     return { ...offer, referencePrice, spread, spreadPct, score };
   });
 

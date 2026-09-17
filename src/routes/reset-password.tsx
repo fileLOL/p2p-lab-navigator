@@ -13,7 +13,10 @@ export const Route = createFileRoute("/reset-password")({
       { title: "Restablecer contraseña — P2P Lab" },
       { name: "description", content: "Define una nueva contraseña para tu cuenta de P2P Lab." },
       { property: "og:title", content: "Restablecer contraseña — P2P Lab" },
-      { property: "og:description", content: "Define una nueva contraseña para tu cuenta de P2P Lab." },
+      {
+        property: "og:description",
+        content: "Define una nueva contraseña para tu cuenta de P2P Lab.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -56,8 +59,8 @@ function ResetPasswordPage() {
         <h1 className="font-display text-xl font-semibold">Nueva contraseña</h1>
         {!ready ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            Abre esta página desde el enlace que te hemos enviado por correo. Si el enlace ha caducado, solicita otro
-            desde la pantalla de acceso.
+            Abre esta página desde el enlace que te hemos enviado por correo. Si el enlace ha
+            caducado, solicita otro desde la pantalla de acceso.
           </p>
         ) : null}
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">

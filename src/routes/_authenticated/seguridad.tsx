@@ -27,9 +27,16 @@ export const Route = createFileRoute("/_authenticated/seguridad")({
   head: () => ({
     meta: [
       { title: "Perfil y seguridad — P2P Lab" },
-      { name: "description", content: "Gestiona tu perfil, revisa la actividad de tu cuenta y elimina tus datos cuando quieras." },
+      {
+        name: "description",
+        content:
+          "Gestiona tu perfil, revisa la actividad de tu cuenta y elimina tus datos cuando quieras.",
+      },
       { property: "og:title", content: "Perfil y seguridad — P2P Lab" },
-      { property: "og:description", content: "Perfil, actividad y eliminación de cuenta en P2P Lab." },
+      {
+        property: "og:description",
+        content: "Perfil, actividad y eliminación de cuenta en P2P Lab.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -64,14 +71,22 @@ function SecurityPage() {
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="profile-name">Nombre</Label>
-              <Input id="profile-name" value={displayName} onChange={(e) => setName(e.target.value)} />
+              <Input
+                id="profile-name"
+                value={displayName}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="profile-email">Correo</Label>
               <Input id="profile-email" value={user?.email ?? ""} disabled />
             </div>
           </div>
-          <Button className="mt-4" onClick={() => saveProfile.mutate()} disabled={saveProfile.isPending}>
+          <Button
+            className="mt-4"
+            onClick={() => saveProfile.mutate()}
+            disabled={saveProfile.isPending}
+          >
             Guardar cambios
           </Button>
         </section>
@@ -112,14 +127,22 @@ function SecurityPage() {
           {audit.isLoading ? (
             <p className="mt-2 text-sm text-muted-foreground">Cargando actividad...</p>
           ) : !audit.data || audit.data.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">No hay actividad registrada todavía.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              No hay actividad registrada todavía.
+            </p>
           ) : (
             <ul className="mt-3 space-y-2 text-sm">
               {audit.data.map((entry) => (
-                <li key={entry.id} className="flex items-center justify-between gap-3 border-b border-border/60 pb-2 last:border-0">
+                <li
+                  key={entry.id}
+                  className="flex items-center justify-between gap-3 border-b border-border/60 pb-2 last:border-0"
+                >
                   <span>{actionLabel(entry.action)}</span>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(entry.created_at).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}
+                    {new Date(entry.created_at).toLocaleString("es-ES", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
                   </span>
                 </li>
               ))}
@@ -169,8 +192,8 @@ function DeleteAccountSection() {
         <div>
           <h2 className="font-display text-base font-semibold">Eliminar cuenta</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Se borran de forma permanente tu perfil, tu cartera virtual, tus operaciones y tu historial. No se puede
-            deshacer.
+            Se borran de forma permanente tu perfil, tu cartera virtual, tus operaciones y tu
+            historial. No se puede deshacer.
           </p>
         </div>
       </div>
@@ -183,12 +206,17 @@ function DeleteAccountSection() {
           <DialogHeader>
             <DialogTitle>¿Seguro que quieres eliminar tu cuenta?</DialogTitle>
             <DialogDescription>
-              Perderás tu capital virtual, tus posiciones abiertas y todo tu histórico de operaciones.
+              Perderás tu capital virtual, tus posiciones abiertas y todo tu histórico de
+              operaciones.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStep(0)}>Cancelar</Button>
-            <Button variant="destructive" onClick={() => setStep(2)}>Continuar</Button>
+            <Button variant="outline" onClick={() => setStep(0)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={() => setStep(2)}>
+              Continuar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -199,9 +227,15 @@ function DeleteAccountSection() {
             <DialogTitle>Confirmación final</DialogTitle>
             <DialogDescription>Escribe ELIMINAR en mayúsculas para confirmar.</DialogDescription>
           </DialogHeader>
-          <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="ELIMINAR" />
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="ELIMINAR"
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStep(0)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setStep(0)}>
+              Cancelar
+            </Button>
             <Button
               variant="destructive"
               disabled={confirmText !== "ELIMINAR" || mutation.isPending}

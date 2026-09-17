@@ -17,7 +17,8 @@ export const Route = createFileRoute("/auth")({
       { title: "Acceder a P2P Lab" },
       {
         name: "description",
-        content: "Crea tu cuenta gratuita de P2P Lab y empieza a simular operaciones P2P con capital virtual.",
+        content:
+          "Crea tu cuenta gratuita de P2P Lab y empieza a simular operaciones P2P con capital virtual.",
       },
       { property: "og:title", content: "Acceder a P2P Lab" },
       { property: "og:description", content: "Registro y acceso a P2P Lab." },
@@ -45,7 +46,13 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-10">
       <Link to="/" className="flex items-center gap-2">
-        <img src="/icons/icon-192.png" alt="P2P Lab" width={36} height={36} className="size-9 rounded-lg" />
+        <img
+          src="/icons/icon-192.png"
+          alt="P2P Lab"
+          width={36}
+          height={36}
+          className="size-9 rounded-lg"
+        />
         <span className="font-display text-xl font-semibold">P2P Lab</span>
       </Link>
 
@@ -64,7 +71,8 @@ function AuthPage() {
         </Tabs>
       </div>
       <p className="max-w-md text-center text-xs text-muted-foreground">
-        P2P Lab es una herramienta de análisis y simulación. No custodiamos fondos ni ejecutamos operaciones reales.
+        P2P Lab es una herramienta de análisis y simulación. No custodiamos fondos ni ejecutamos
+        operaciones reales.
       </p>
     </div>
   );
@@ -82,7 +90,11 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(error.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : error.message);
+      toast.error(
+        error.message === "Invalid login credentials"
+          ? "Correo o contraseña incorrectos."
+          : error.message,
+      );
       return;
     }
     toast.success("Sesión iniciada");
@@ -129,7 +141,13 @@ function LoginForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Entrando..." : "Entrar"}
       </Button>
-      <Button type="button" variant="ghost" className="w-full" onClick={handleRecover} disabled={recovering}>
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full"
+        onClick={handleRecover}
+        disabled={recovering}
+      >
         {recovering ? "Enviando..." : "He olvidado mi contraseña"}
       </Button>
     </form>

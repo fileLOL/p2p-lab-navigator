@@ -26,7 +26,11 @@ export const binanceP2PSource: P2PSource = {
       });
 
       if (!res.ok) {
-        return { offers: [], status: "unavailable", message: `Binance P2P respondió ${res.status}` };
+        return {
+          offers: [],
+          status: "unavailable",
+          message: `Binance P2P respondió ${res.status}`,
+        };
       }
 
       const json = (await res.json()) as { data?: BinanceAdv[] };
@@ -164,4 +168,10 @@ export const ALL_SOURCES: P2PSource[] = [
   demoSource,
 ];
 
-export const REAL_SOURCES: P2PSource[] = [binanceP2PSource, bybitSource, okxSource, hodlHodlSource, peachSource];
+export const REAL_SOURCES: P2PSource[] = [
+  binanceP2PSource,
+  bybitSource,
+  okxSource,
+  hodlHodlSource,
+  peachSource,
+];

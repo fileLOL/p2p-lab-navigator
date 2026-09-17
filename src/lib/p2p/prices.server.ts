@@ -23,7 +23,8 @@ export async function fetchReferencePrice(asset: string, fiat: string): Promise<
     if (!res.ok) return { price: null, isReal: false, source: "coingecko_error" };
     const json = (await res.json()) as Record<string, Record<string, number>>;
     const price = json[id]?.[fiat.toLowerCase()];
-    if (typeof price !== "number" || price <= 0) return { price: null, isReal: false, source: "coingecko_empty" };
+    if (typeof price !== "number" || price <= 0)
+      return { price: null, isReal: false, source: "coingecko_empty" };
     return { price, isReal: true, source: "coingecko" };
   } catch {
     return { price: null, isReal: false, source: "coingecko_unavailable" };
