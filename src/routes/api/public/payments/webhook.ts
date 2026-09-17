@@ -1,10 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { EventName, verifyWebhook, type PaddleEnv } from "@/lib/paddle.server";
 
-let cachedClient: ReturnType<typeof createClient> | null = null;
-function getSupabase() {
+let cachedClient: SupabaseClient | null = null;
+function getSupabase(): SupabaseClient {
   if (!cachedClient) {
     cachedClient = createClient(
       process.env["SUPABASE_URL"]!,
