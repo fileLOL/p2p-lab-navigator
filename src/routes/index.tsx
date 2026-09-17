@@ -72,7 +72,7 @@ function Landing() {
               <Button asChild size="lg">
                 <Link to={ctaTo}>{ctaLabel}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button asChild size="lg" variant="hero">
                 <a href="#como-funciona">Ver cómo funciona</a>
               </Button>
             </div>
