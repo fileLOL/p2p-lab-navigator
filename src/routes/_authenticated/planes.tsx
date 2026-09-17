@@ -13,7 +13,12 @@ import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { getBillingPortalUrl, getSubscription } from "@/lib/payments.functions";
+import {
+  cancelSubscription,
+  changeSubscriptionPlan,
+  getBillingPortalUrl,
+  getSubscription,
+} from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/planes")({
   head: () => ({
@@ -46,6 +51,8 @@ function PlansPage() {
   const environment = getPaddleEnvironment();
 
   const downgrade = useServerFn(changePlan);
+  const cancelFn = useServerFn(cancelSubscription);
+  const switchFn = useServerFn(changeSubscriptionPlan);
   const subscriptionFn = useServerFn(getSubscription);
   const portalFn = useServerFn(getBillingPortalUrl);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
@@ -58,11 +65,42 @@ function PlansPage() {
     staleTime: 15_000,
   });
 
+  const hasActiveSubscription = Boolean(
+    subscription.data && subscription.data.status !== "canceled",
+  );
+  const pendingCancel = Boolean(subscription.data?.cancel_at_period_end);
+
   const cancelMutation = useMutation({
+    mutationFn: () => cancelFn({ data: { environment } }),
+    onSuccess: (result) => {
+      const end = result.current_period_end
+        ? new Date(result.current_period_end).toLocaleDateString("es-ES")
+        : null;
+      toast.success(
+        end
+          ? `Suscripción cancelada. Mantienes tu plan hasta el ${end}.`
+          : "Suscripción cancelada al final del periodo pagado.",
+      );
+      invalidate();
+      void subscription.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const downgradeMutation = useMutation({
     mutationFn: () => downgrade({ data: { plan: "free" } }),
     onSuccess: () => {
       toast.success("Has vuelto al plan Gratis.");
       invalidate();
+      void subscription.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const switchMutation = useMutation({
+    mutationFn: (priceId: string) => switchFn({ data: { environment, priceId } }),
+    onSuccess: () => {
+      toast.success("Cambio programado: se aplicará en tu próxima renovación.");
       void subscription.refetch();
     },
     onError: (error: Error) => toast.error(error.message),
