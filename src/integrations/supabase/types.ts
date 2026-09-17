@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_secrets: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       asset_prices: {
         Row: {
           asset: string
@@ -62,6 +77,27 @@ export type Database = {
           id?: string
           metadata?: Json
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      email_search_usage: {
+        Row: {
+          email_hash: string
+          searches: number
+          updated_at: string
+          usage_date: string
+        }
+        Insert: {
+          email_hash: string
+          searches?: number
+          updated_at?: string
+          usage_date?: string
+        }
+        Update: {
+          email_hash?: string
+          searches?: number
+          updated_at?: string
+          usage_date?: string
         }
         Relationships: []
       }
@@ -344,7 +380,9 @@ export type Database = {
     Functions: {
       change_plan: { Args: { _plan: string }; Returns: Json }
       consume_search: { Args: never; Returns: Json }
+      current_email_hash: { Args: never; Returns: string }
       delete_my_account: { Args: never; Returns: undefined }
+      email_usage_hash: { Args: { _email: string }; Returns: string }
       get_quota: { Args: never; Returns: Json }
       log_action: {
         Args: { _action: string; _metadata?: Json }
