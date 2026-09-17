@@ -57,7 +57,15 @@ export const cancelSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ environment: envSchema }).parse(input))
   .handler(async ({ data, context }) => {
-    const row = await getCurrentSubscription(context.supabase, context.userId, data.environment);
+    const { data: row, error } = await context.supabase
+      .from("subscriptions")
+      .select(SUBSCRIPTION_COLUMNS)
+      .eq("user_id", context.userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
     if (!row) throw new Error("No tienes ninguna suscripción activa.");
     if (row.status === "canceled") throw new Error("Esta suscripción ya está cancelada.");
 
