@@ -7,13 +7,13 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { StripeCheckoutDialog } from "@/components/StripeCheckoutDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateOverview, useOverview } from "@/hooks/useOverview";
-import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
-import { getPaddleEnvironment } from "@/lib/paddle";
+import { getStripeEnvironment } from "@/lib/stripe";
 import {
   cancelSubscription,
   changeSubscriptionPlan,
@@ -49,14 +49,14 @@ function PlansPage() {
   const { data } = useOverview();
   const { user } = useAuth();
   const invalidate = useInvalidateOverview();
-  const environment = getPaddleEnvironment();
+  const environment = getStripeEnvironment();
 
   const downgrade = useServerFn(changePlan);
   const cancelFn = useServerFn(cancelSubscription);
   const switchFn = useServerFn(changeSubscriptionPlan);
   const subscriptionFn = useServerFn(getSubscription);
   const portalFn = useServerFn(getBillingPortalUrl);
-  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
 
   const current = (data?.profile?.plan ?? "free") as PlanId;
 
