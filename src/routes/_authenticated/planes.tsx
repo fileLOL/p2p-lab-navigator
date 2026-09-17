@@ -231,8 +231,9 @@ function PlansPage() {
 
         <p className="text-xs text-muted-foreground">
           El pago se procesa de forma segura por nuestro proveedor, que actúa como vendedor
-          autorizado y emite la factura. Puedes cancelar cuando quieras desde «Gestionar
-          suscripción»; mantendrás el plan hasta el final del periodo pagado.
+          autorizado y emite la factura. Puedes cancelar cuando quieras; mantendrás el plan
+          hasta el final del periodo pagado. Los cambios entre Mensual y Anual se aplican en
+          tu próxima renovación, sin cargos parciales.
         </p>
         <p className="text-xs text-muted-foreground">
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
