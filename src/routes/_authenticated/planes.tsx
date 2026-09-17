@@ -188,19 +188,40 @@ function PlansPage() {
                   <Button
                     className="mt-5 w-full"
                     variant="outline"
-                    disabled={isCurrent || cancelMutation.isPending}
-                    onClick={() => cancelMutation.mutate()}
+                    disabled={
+                      isCurrent ||
+                      pendingCancel ||
+                      cancelMutation.isPending ||
+                      downgradeMutation.isPending
+                    }
+                    onClick={() =>
+                      hasActiveSubscription ? cancelMutation.mutate() : downgradeMutation.mutate()
+                    }
                   >
-                    {isCurrent ? "Plan actual" : "Volver a gratis"}
+                    {isCurrent
+                      ? "Plan actual"
+                      : hasActiveSubscription
+                        ? "Cancelar suscripción"
+                        : "Volver a gratis"}
                   </Button>
                 ) : (
                   <Button
                     className="mt-5 w-full"
                     variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent || checkoutLoading}
-                    onClick={() => void buy(id)}
+                    disabled={isCurrent || checkoutLoading || switchMutation.isPending}
+                    onClick={() => {
+                      if (hasActiveSubscription && !pendingCancel) {
+                        switchMutation.mutate(PRICE_IDS[id]);
+                      } else {
+                        void buy(id);
+                      }
+                    }}
                   >
-                    {isCurrent ? "Plan actual" : `Suscribirme por ${plan.price}`}
+                    {isCurrent
+                      ? "Plan actual"
+                      : hasActiveSubscription && !pendingCancel
+                        ? `Cambiar a ${plan.name} (al renovar)`
+                        : `Suscribirme por ${plan.price}`}
                   </Button>
                 )}
               </article>
