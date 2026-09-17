@@ -29,7 +29,13 @@ export function GoogleSignInButton({ redirectTo }: { redirectTo: string }) {
   };
 
   return (
-    <Button type="button" variant="outline" className="w-full" onClick={handleClick} disabled={loading}>
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full"
+      onClick={handleClick}
+      disabled={loading}
+    >
       <GoogleMark />
       {loading ? "Conectando..." : "Continuar con Google"}
     </Button>
