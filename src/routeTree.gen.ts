@@ -13,7 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as OauthCallbackRouteImport } from './routes/oauth-callback'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
+import { Route as ReembolsosRouteImport } from './routes/reembolsos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as AuthenticatedCarteraRouteImport } from './routes/_authenticated/cartera'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEstadisticasRouteImport } from './routes/_authenticated/estadisticas'
@@ -42,9 +45,24 @@ const OauthCallbackRoute = OauthCallbackRouteImport.update({
   path: '/oauth-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReembolsosRoute = ReembolsosRouteImport.update({
+  id: '/reembolsos',
+  path: '/reembolsos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedCarteraRoute = AuthenticatedCarteraRouteImport.update({
@@ -96,7 +114,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/privacidad': typeof PrivacidadRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/cartera': typeof AuthenticatedCarteraRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estadisticas': typeof AuthenticatedEstadisticasRoute
@@ -110,7 +131,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/privacidad': typeof PrivacidadRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/cartera': typeof AuthenticatedCarteraRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estadisticas': typeof AuthenticatedEstadisticasRoute
@@ -126,7 +150,10 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/privacidad': typeof PrivacidadRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/_authenticated/cartera': typeof AuthenticatedCarteraRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estadisticas': typeof AuthenticatedEstadisticasRoute
@@ -142,7 +169,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/oauth-callback'
+    | '/privacidad'
+    | '/reembolsos'
     | '/reset-password'
+    | '/terminos'
     | '/cartera'
     | '/dashboard'
     | '/estadisticas'
@@ -156,7 +186,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/oauth-callback'
+    | '/privacidad'
+    | '/reembolsos'
     | '/reset-password'
+    | '/terminos'
     | '/cartera'
     | '/dashboard'
     | '/estadisticas'
@@ -171,7 +204,10 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/oauth-callback'
+    | '/privacidad'
+    | '/reembolsos'
     | '/reset-password'
+    | '/terminos'
     | '/_authenticated/cartera'
     | '/_authenticated/dashboard'
     | '/_authenticated/estadisticas'
@@ -187,7 +223,10 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
+  PrivacidadRoute: typeof PrivacidadRoute
+  ReembolsosRoute: typeof ReembolsosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TerminosRoute: typeof TerminosRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -221,11 +260,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reembolsos': {
+      id: '/reembolsos'
+      path: '/reembolsos'
+      fullPath: '/reembolsos'
+      preLoaderRoute: typeof ReembolsosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/cartera': {
@@ -315,7 +375,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   OauthCallbackRoute: OauthCallbackRoute,
+  PrivacidadRoute: PrivacidadRoute,
+  ReembolsosRoute: ReembolsosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TerminosRoute: TerminosRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
