@@ -193,7 +193,9 @@ function DeleteAccountSection() {
           <h2 className="font-display text-base font-semibold">Eliminar cuenta</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Se borran de forma permanente tu perfil, tu cartera virtual, tus operaciones y tu
-            historial. No se puede deshacer.
+            historial. No se puede deshacer. Las búsquedas que ya has gastado hoy quedan
+            asociadas a tu correo: si te registras de nuevo con el mismo correo, la cuota del día
+            no se reinicia.
           </p>
         </div>
       </div>
