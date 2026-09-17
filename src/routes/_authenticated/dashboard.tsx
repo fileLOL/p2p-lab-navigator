@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — P2P Lab" },
-      { name: "description", content: "Resumen de tu cartera virtual: patrimonio, beneficio, ROI y cuota de búsquedas." },
+      {
+        name: "description",
+        content: "Resumen de tu cartera virtual: patrimonio, beneficio, ROI y cuota de búsquedas.",
+      },
       { property: "og:title", content: "Dashboard — P2P Lab" },
       { property: "og:description", content: "Resumen de tu cartera virtual en P2P Lab." },
       { name: "robots", content: "noindex" },
@@ -36,10 +39,21 @@ function DashboardPage() {
       ) : data ? (
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard label="Patrimonio total" value={formatMoney(data.metrics.equity)} hint="Efectivo + posiciones" />
+            <MetricCard
+              label="Patrimonio total"
+              value={formatMoney(data.metrics.equity)}
+              hint="Efectivo + posiciones"
+            />
             <MetricCard label="Efectivo disponible" value={formatMoney(data.metrics.cash)} />
-            <MetricCard label="Capital invertido" value={formatMoney(data.metrics.invested_cost)} hint="Coste de posiciones abiertas" />
-            <MetricCard label="Valor de cartera" value={formatMoney(data.metrics.positions_value)} />
+            <MetricCard
+              label="Capital invertido"
+              value={formatMoney(data.metrics.invested_cost)}
+              hint="Coste de posiciones abiertas"
+            />
+            <MetricCard
+              label="Valor de cartera"
+              value={formatMoney(data.metrics.positions_value)}
+            />
             <MetricCard
               label="Beneficio realizado"
               value={formatMoney(data.metrics.realized_pnl)}
@@ -65,10 +79,16 @@ function DashboardPage() {
 
           <div className="grid gap-3 lg:grid-cols-3">
             <QuotaCard quota={data.quota} />
-            <TradeSummary trades={data.trades} drawdown={data.metrics.max_drawdown} drawdownPct={data.metrics.max_drawdown_pct} />
+            <TradeSummary
+              trades={data.trades}
+              drawdown={data.metrics.max_drawdown}
+              drawdownPct={data.metrics.max_drawdown_pct}
+            />
             <div className="surface-card flex flex-col justify-between p-4">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Siguiente paso
+                </p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Busca oportunidades P2P, compáralas y simula una operación con tu capital virtual.
                 </p>
@@ -96,7 +116,12 @@ function TradeSummary({
   drawdownPct: number;
 }) {
   const stats = computeTradeStats(
-    trades.map((t) => ({ side: t.side, realizedPnl: t.realized_pnl, total: t.total, asset: t.asset })),
+    trades.map((t) => ({
+      side: t.side,
+      realizedPnl: t.realized_pnl,
+      total: t.total,
+      asset: t.asset,
+    })),
   );
 
   return (
@@ -106,7 +131,10 @@ function TradeSummary({
         <Row label="Operaciones" value={String(stats.totalTrades)} />
         <Row label="Ganadoras" value={String(stats.wins)} />
         <Row label="Perdedoras" value={String(stats.losses)} />
-        <Row label="Drawdown máximo" value={`${formatMoney(drawdown)} (${drawdownPct.toFixed(2)} %)`} />
+        <Row
+          label="Drawdown máximo"
+          value={`${formatMoney(drawdown)} (${drawdownPct.toFixed(2)} %)`}
+        />
       </dl>
     </div>
   );

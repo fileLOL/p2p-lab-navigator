@@ -81,17 +81,32 @@ export const getOverview = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    const [{ data: metricsRaw, error: metricsError }, { data: quotaRaw }, { data: profile }] = await Promise.all([
-      supabase.rpc("refresh_equity"),
-      supabase.rpc("get_quota"),
-      supabase.from("profiles").select("id, email, display_name, plan, plan_started_at").eq("id", userId).maybeSingle(),
-    ]);
+    const [{ data: metricsRaw, error: metricsError }, { data: quotaRaw }, { data: profile }] =
+      await Promise.all([
+        supabase.rpc("refresh_equity"),
+        supabase.rpc("get_quota"),
+        supabase
+          .from("profiles")
+          .select("id, email, display_name, plan, plan_started_at")
+          .eq("id", userId)
+          .maybeSingle(),
+      ]);
     if (metricsError) throw new Error(metricsError.message);
 
     const [{ data: positions }, { data: prices }, { data: trades }] = await Promise.all([
       supabase.from("paper_positions").select("asset, quantity, avg_cost").eq("user_id", userId),
-      supabase.from("asset_prices").select("asset, price, fiat, is_real, updated_at").eq("fiat", "EUR"),
-      supabase.from("paper_trades").select("id, asset, side, quantity, price, total, fees, realized_pnl, status, opportunity_id, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
+      supabase
+        .from("asset_prices")
+        .select("asset, price, fiat, is_real, updated_at")
+        .eq("fiat", "EUR"),
+      supabase
+        .from("paper_trades")
+        .select(
+          "id, asset, side, quantity, price, total, fees, realized_pnl, status, opportunity_id, created_at",
+        )
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
 
     const priceMap: Record<string, number> = {};
@@ -149,13 +164,25 @@ export const getOverview = createServerFn({ method: "GET" })
 export const listTrades = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { page?: number; pageSize?: number }) =>
-    z.object({ page: z.number().int().min(0).default(0), pageSize: z.number().int().min(1).max(50).default(10) }).parse(input ?? {}),
+    z
+      .object({
+        page: z.number().int().min(0).default(0),
+        pageSize: z.number().int().min(1).max(50).default(10),
+      })
+      .parse(input ?? {}),
   )
   .handler(async ({ data, context }) => {
     const from = data.page * data.pageSize;
-    const { data: rows, count, error } = await context.supabase
+    const {
+      data: rows,
+      count,
+      error,
+    } = await context.supabase
       .from("paper_trades")
-      .select("id, asset, side, quantity, price, total, fees, realized_pnl, status, opportunity_id, created_at", { count: "exact" })
+      .select(
+        "id, asset, side, quantity, price, total, fees, realized_pnl, status, opportunity_id, created_at",
+        { count: "exact" },
+      )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .range(from, from + data.pageSize - 1);
@@ -240,7 +267,12 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       const demo = await demoSource.fetchOffers(params);
       offers = demo.offers;
       dataMode = "demo";
-      sourceStatus.push({ key: demoSource.key, name: demoSource.name, status: demo.status, message: demo.message });
+      sourceStatus.push({
+        key: demoSource.key,
+        name: demoSource.name,
+        status: demo.status,
+        message: demo.message,
+      });
     }
 
     const normalized = normalizeOffers(offers, reference.price, params);
@@ -348,7 +380,13 @@ const tradeSchema = z.object({
   opportunityId: z.string().uuid().nullable().optional(),
 });
 
-type TradeArgs = { _asset: string; _price: number; _quantity: number; _fees: number; _opportunity_id?: string };
+type TradeArgs = {
+  _asset: string;
+  _price: number;
+  _quantity: number;
+  _fees: number;
+  _opportunity_id?: string;
+};
 
 function tradeArgs(data: z.infer<typeof tradeSchema>): TradeArgs {
   const base: TradeArgs = {
@@ -379,8 +417,10 @@ export const paperSell = createServerFn({ method: "POST" })
   });
 
 function translateDbError(message: string): string {
-  if (message.includes("insufficient_cash")) return "No tienes suficiente efectivo virtual para esta operación.";
-  if (message.includes("insufficient_position")) return "No tienes suficiente cantidad de este activo.";
+  if (message.includes("insufficient_cash"))
+    return "No tienes suficiente efectivo virtual para esta operación.";
+  if (message.includes("insufficient_position"))
+    return "No tienes suficiente cantidad de este activo.";
   if (message.includes("invalid_opportunity")) return "La oportunidad no es válida o ha caducado.";
   if (message.includes("invalid_input")) return "Los datos de la operación no son válidos.";
   return message;
@@ -390,7 +430,9 @@ function translateDbError(message: string): string {
 
 export const changePlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ plan: z.enum(["free", "monthly", "yearly"]) }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ plan: z.enum(["free", "monthly", "yearly"]) }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { data: quota, error } = await context.supabase.rpc("change_plan", { _plan: data.plan });
     if (error) throw new Error(error.message);
@@ -401,7 +443,9 @@ export const changePlan = createServerFn({ method: "POST" })
 
 export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ displayName: z.string().min(1).max(60) }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ displayName: z.string().min(1).max(60) }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("profiles")
@@ -439,5 +483,10 @@ export const deleteAccount = createServerFn({ method: "POST" })
 
 export const getSources = createServerFn({ method: "GET" }).handler(async () => {
   const { ALL_SOURCES } = await import("@/lib/p2p/sources.server");
-  return ALL_SOURCES.map((s) => ({ key: s.key, name: s.name, isReal: s.isReal, website: s.website ?? null }));
+  return ALL_SOURCES.map((s) => ({
+    key: s.key,
+    name: s.name,
+    isReal: s.isReal,
+    website: s.website ?? null,
+  }));
 });

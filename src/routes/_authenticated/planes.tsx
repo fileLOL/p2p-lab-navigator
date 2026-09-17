@@ -14,7 +14,11 @@ export const Route = createFileRoute("/_authenticated/planes")({
   head: () => ({
     meta: [
       { title: "Planes y cuota — P2P Lab" },
-      { name: "description", content: "Compara los planes Gratis, Mensual y Anual de P2P Lab y amplía tu cuota diaria de búsquedas." },
+      {
+        name: "description",
+        content:
+          "Compara los planes Gratis, Mensual y Anual de P2P Lab y amplía tu cuota diaria de búsquedas.",
+      },
       { property: "og:title", content: "Planes y cuota — P2P Lab" },
       { property: "og:description", content: "Planes de P2P Lab con más búsquedas diarias." },
       { name: "robots", content: "noindex" },
@@ -46,8 +50,8 @@ function PlansPage() {
         <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
           <p className="font-medium">Pagos simulados</p>
           <p className="mt-1 text-muted-foreground">
-            Todavía no hay cobros reales. Al cambiar de plan activas la cuota correspondiente en modo demostración; no se
-            realiza ningún cargo ni se solicitan datos de pago.
+            Todavía no hay cobros reales. Al cambiar de plan activas la cuota correspondiente en
+            modo demostración; no se realiza ningún cargo ni se solicitan datos de pago.
           </p>
         </div>
 
@@ -56,16 +60,21 @@ function PlansPage() {
             const plan = PLANS[id];
             const isCurrent = current === id;
             return (
-              <article key={id} className={`surface-card flex flex-col p-5 ${isCurrent ? "ring-2 ring-primary" : ""}`}>
+              <article
+                key={id}
+                className={`surface-card flex flex-col p-5 ${isCurrent ? "ring-2 ring-primary" : ""}`}
+              >
                 <p className="font-display text-lg font-semibold">{plan.name}</p>
                 <p className="num mt-1 text-3xl font-semibold">
-                  {plan.price === 0 ? "0 €" : `${plan.price} €`}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {id === "monthly" ? " /mes" : id === "yearly" ? " /año" : ""}
+                  {plan.price}
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">
+                    {plan.priceDetail}
                   </span>
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {plan.dailySearches < 0 ? "Búsquedas ilimitadas" : `${plan.dailySearches} búsquedas al día`}
+                  {plan.dailySearches < 0
+                    ? "Búsquedas ilimitadas"
+                    : `${plan.dailySearches} búsquedas al día`}
                 </p>
                 <ul className="mt-4 space-y-2 text-sm">
                   {plan.features.map((f) => (
@@ -81,7 +90,11 @@ function PlansPage() {
                   disabled={isCurrent || mutation.isPending}
                   onClick={() => mutation.mutate(id)}
                 >
-                  {isCurrent ? "Plan actual" : id === "free" ? "Volver a gratis" : "Activar (simulado)"}
+                  {isCurrent
+                    ? "Plan actual"
+                    : id === "free"
+                      ? "Volver a gratis"
+                      : "Activar (simulado)"}
                 </Button>
               </article>
             );
@@ -89,8 +102,8 @@ function PlansPage() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          El paper trading, la cartera, el historial y las estadísticas están disponibles en todos los planes, también
-          cuando agotas la cuota de búsquedas.
+          El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
+          los planes, también cuando agotas la cuota de búsquedas.
         </p>
       </div>
     </AppShell>

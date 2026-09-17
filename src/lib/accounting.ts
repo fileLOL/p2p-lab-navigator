@@ -54,7 +54,8 @@ export function computePortfolio(input: PortfolioInput): PortfolioMetrics {
     realizedPnl: input.realizedPnl,
     unrealizedPnl,
     totalPnl: input.realizedPnl + unrealizedPnl,
-    roiPct: input.initialCapital > 0 ? ((equity - input.initialCapital) / input.initialCapital) * 100 : 0,
+    roiPct:
+      input.initialCapital > 0 ? ((equity - input.initialCapital) / input.initialCapital) * 100 : 0,
     maxDrawdown: drawdown,
     maxDrawdownPct: peak > 0 ? (drawdown / peak) * 100 : 0,
   };

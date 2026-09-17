@@ -48,8 +48,12 @@ export function SimulateDialog({
   const fees = Number(feePct) || 0;
   const amountNumber = Number(amount) || 0;
 
-  const buyQuote = target ? quoteBuy({ price: target.price, amountFiat: amountNumber, feePct: fees }) : null;
-  const sellQuote = target ? quoteSell({ price: target.price, quantity: amountNumber, feePct: fees }) : null;
+  const buyQuote = target
+    ? quoteBuy({ price: target.price, amountFiat: amountNumber, feePct: fees })
+    : null;
+  const sellQuote = target
+    ? quoteSell({ price: target.price, quantity: amountNumber, feePct: fees })
+    : null;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -79,7 +83,9 @@ export function SimulateDialog({
       }
     },
     onSuccess: () => {
-      toast.success(target?.side === "buy" ? "Compra simulada registrada." : "Venta simulada registrada.");
+      toast.success(
+        target?.side === "buy" ? "Compra simulada registrada." : "Venta simulada registrada.",
+      );
       invalidate();
       setAmount("");
       onOpenChange(false);
@@ -99,7 +105,8 @@ export function SimulateDialog({
             Simular {isBuy ? "compra" : "venta"} de {target.asset}
           </DialogTitle>
           <DialogDescription>
-            Operación con capital virtual. No se ejecuta nada real{target.providerName ? ` en ${target.providerName}` : ""}.
+            Operación con capital virtual. No se ejecuta nada real
+            {target.providerName ? ` en ${target.providerName}` : ""}.
           </DialogDescription>
         </DialogHeader>
 
@@ -111,12 +118,16 @@ export function SimulateDialog({
             </div>
             <div className="rounded-md bg-muted p-3">
               <p className="text-xs text-muted-foreground">Precio</p>
-              <p className="num font-medium">{formatMoney(target.price, target.fiat, target.price < 10 ? 4 : 2)}</p>
+              <p className="num font-medium">
+                {formatMoney(target.price, target.fiat, target.price < 10 ? 4 : 2)}
+              </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sim-amount">{isBuy ? `Importe a invertir (${target.fiat})` : `Cantidad de ${target.asset}`}</Label>
+            <Label htmlFor="sim-amount">
+              {isBuy ? `Importe a invertir (${target.fiat})` : `Cantidad de ${target.asset}`}
+            </Label>
             <Input
               id="sim-amount"
               inputMode="decimal"
@@ -128,7 +139,9 @@ export function SimulateDialog({
               <button
                 type="button"
                 className="text-xs text-primary underline"
-                onClick={() => setAmount(String(Math.floor((target.availableCash ?? 0) * 100) / 100))}
+                onClick={() =>
+                  setAmount(String(Math.floor((target.availableCash ?? 0) * 100) / 100))
+                }
               >
                 Usar todo el efectivo disponible ({formatMoney(target.availableCash, target.fiat)})
               </button>
@@ -146,7 +159,12 @@ export function SimulateDialog({
 
           <div className="space-y-2">
             <Label htmlFor="sim-fee">Comisión estimada (%)</Label>
-            <Input id="sim-fee" inputMode="decimal" value={feePct} onChange={(e) => setFeePct(e.target.value)} />
+            <Input
+              id="sim-fee"
+              inputMode="decimal"
+              value={feePct}
+              onChange={(e) => setFeePct(e.target.value)}
+            />
           </div>
 
           <div className="rounded-md border border-border p-3 text-sm">
@@ -154,25 +172,43 @@ export function SimulateDialog({
             {isBuy ? (
               <ul className="space-y-1 text-muted-foreground">
                 <li>
-                  Cantidad recibida: <span className="num text-foreground">{formatQty(buyQuote?.quantity ?? 0)} {target.asset}</span>
+                  Cantidad recibida:{" "}
+                  <span className="num text-foreground">
+                    {formatQty(buyQuote?.quantity ?? 0)} {target.asset}
+                  </span>
                 </li>
                 <li>
-                  Comisiones: <span className="num text-foreground">{formatMoney(buyQuote?.fees ?? 0, target.fiat)}</span>
+                  Comisiones:{" "}
+                  <span className="num text-foreground">
+                    {formatMoney(buyQuote?.fees ?? 0, target.fiat)}
+                  </span>
                 </li>
                 <li>
-                  Coste total: <span className="num text-foreground">{formatMoney(buyQuote?.totalCost ?? 0, target.fiat)}</span>
+                  Coste total:{" "}
+                  <span className="num text-foreground">
+                    {formatMoney(buyQuote?.totalCost ?? 0, target.fiat)}
+                  </span>
                 </li>
               </ul>
             ) : (
               <ul className="space-y-1 text-muted-foreground">
                 <li>
-                  Importe bruto: <span className="num text-foreground">{formatMoney(sellQuote?.gross ?? 0, target.fiat)}</span>
+                  Importe bruto:{" "}
+                  <span className="num text-foreground">
+                    {formatMoney(sellQuote?.gross ?? 0, target.fiat)}
+                  </span>
                 </li>
                 <li>
-                  Comisiones: <span className="num text-foreground">{formatMoney(sellQuote?.fees ?? 0, target.fiat)}</span>
+                  Comisiones:{" "}
+                  <span className="num text-foreground">
+                    {formatMoney(sellQuote?.fees ?? 0, target.fiat)}
+                  </span>
                 </li>
                 <li>
-                  Recibirás: <span className="num text-foreground">{formatMoney(sellQuote?.net ?? 0, target.fiat)}</span>
+                  Recibirás:{" "}
+                  <span className="num text-foreground">
+                    {formatMoney(sellQuote?.net ?? 0, target.fiat)}
+                  </span>
                 </li>
               </ul>
             )}
@@ -185,7 +221,10 @@ export function SimulateDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || amountNumber <= 0}>
+          <Button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || amountNumber <= 0}
+          >
             {mutation.isPending ? "Registrando..." : "Confirmar simulación"}
           </Button>
         </DialogFooter>

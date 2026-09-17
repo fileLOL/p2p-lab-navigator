@@ -15,7 +15,10 @@ export const Route = createFileRoute("/_authenticated/operaciones")({
   head: () => ({
     meta: [
       { title: "Operaciones simuladas — P2P Lab" },
-      { name: "description", content: "Histórico completo de tus compras y ventas simuladas con capital virtual." },
+      {
+        name: "description",
+        content: "Histórico completo de tus compras y ventas simuladas con capital virtual.",
+      },
       { property: "og:title", content: "Operaciones simuladas — P2P Lab" },
       { property: "og:description", content: "Histórico de tus operaciones simuladas." },
       { name: "robots", content: "noindex" },
@@ -42,7 +45,9 @@ function TradesPage() {
         <div className="surface-card flex flex-col items-center gap-2 p-10 text-center">
           <History className="size-6 text-muted-foreground" />
           <p className="font-medium">Todavía no hay operaciones</p>
-          <p className="text-sm text-muted-foreground">Cuando simules una compra o una venta aparecerá aquí.</p>
+          <p className="text-sm text-muted-foreground">
+            Cuando simules una compra o una venta aparecerá aquí.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -63,12 +68,17 @@ function TradesPage() {
                 {data.trades.map((t) => (
                   <tr key={t.id} className="border-b border-border/60 last:border-0">
                     <td className="p-3 text-muted-foreground">
-                      {new Date(t.created_at).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}
+                      {new Date(t.created_at).toLocaleString("es-ES", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })}
                     </td>
                     <td className="p-3">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          t.side === "buy" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
+                          t.side === "buy"
+                            ? "bg-primary/10 text-primary"
+                            : "bg-accent/10 text-accent"
                         }`}
                       >
                         {t.side === "buy" ? "Compra" : "Venta"}
@@ -78,7 +88,9 @@ function TradesPage() {
                     <td className="num p-3">{formatQty(t.quantity)}</td>
                     <td className="num p-3">{formatMoney(t.price, "EUR", t.price < 10 ? 4 : 2)}</td>
                     <td className="num p-3">{formatMoney(t.total, "EUR")}</td>
-                    <td className={`num p-3 ${t.realized_pnl > 0 ? "text-success" : t.realized_pnl < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                    <td
+                      className={`num p-3 ${t.realized_pnl > 0 ? "text-success" : t.realized_pnl < 0 ? "text-destructive" : "text-muted-foreground"}`}
+                    >
                       {t.side === "sell" ? formatMoney(t.realized_pnl, "EUR") : "—"}
                     </td>
                   </tr>
@@ -92,7 +104,12 @@ function TradesPage() {
               {data.total} operaciones en total · página {page + 1}
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
                 Anterior
               </Button>
               <Button

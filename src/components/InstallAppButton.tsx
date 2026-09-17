@@ -15,7 +15,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-export function InstallAppButton({ variant = "default" }: { variant?: "default" | "outline" | "secondary" }) {
+export function InstallAppButton({
+  variant = "default",
+}: {
+  variant?: "default" | "outline" | "secondary";
+}) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [installed, setInstalled] = useState(false);
@@ -36,7 +40,9 @@ export function InstallAppButton({ variant = "default" }: { variant?: "default" 
   }, []);
 
   if (installed) {
-    return <p className="text-sm text-muted-foreground">La app ya está instalada en este dispositivo.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">La app ya está instalada en este dispositivo.</p>
+    );
   }
 
   const handleClick = async () => {
@@ -65,15 +71,16 @@ export function InstallAppButton({ variant = "default" }: { variant?: "default" 
           </DialogHeader>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <strong className="text-foreground">iPhone / iPad (Safari):</strong> pulsa Compartir y luego «Añadir a
-              pantalla de inicio».
+              <strong className="text-foreground">iPhone / iPad (Safari):</strong> pulsa Compartir y
+              luego «Añadir a pantalla de inicio».
             </li>
             <li>
-              <strong className="text-foreground">Android (Chrome):</strong> menú de tres puntos y «Instalar aplicación»
-              o «Añadir a pantalla de inicio».
+              <strong className="text-foreground">Android (Chrome):</strong> menú de tres puntos y
+              «Instalar aplicación» o «Añadir a pantalla de inicio».
             </li>
             <li>
-              <strong className="text-foreground">Escritorio:</strong> icono de instalación en la barra de direcciones.
+              <strong className="text-foreground">Escritorio:</strong> icono de instalación en la
+              barra de direcciones.
             </li>
           </ul>
         </DialogContent>

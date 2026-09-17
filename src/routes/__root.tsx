@@ -46,7 +46,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">Esta página no se ha cargado</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          Esta página no se ha cargado
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Algo ha fallado. Puedes reintentar o volver al inicio.
         </p>
@@ -85,7 +87,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "theme-color", content: "#0f2b3d" },
       { property: "og:title", content: "P2P Lab" },
-      { property: "og:description", content: "Oportunidades P2P de criptomonedas y paper trading con capital virtual." },
+      {
+        property: "og:description",
+        content: "Oportunidades P2P de criptomonedas y paper trading con capital virtual.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

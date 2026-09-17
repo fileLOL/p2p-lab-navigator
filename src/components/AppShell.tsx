@@ -27,7 +27,15 @@ const NAV = [
 
 const MOBILE_NAV = NAV.slice(0, 5);
 
-export function AppShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
+export function AppShell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
   const { user, signOut } = useAuth();
   const router = useRouter();
 
@@ -41,7 +49,13 @@ export function AppShell({ title, subtitle, children }: { title: string; subtitl
       <div className="mx-auto flex w-full max-w-7xl">
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-sidebar px-3 py-5 lg:flex">
           <Link to="/dashboard" className="mb-6 flex items-center gap-2 px-2">
-            <img src="/icons/icon-192.png" alt="P2P Lab" width={32} height={32} className="size-8 rounded-lg" />
+            <img
+              src="/icons/icon-192.png"
+              alt="P2P Lab"
+              width={32}
+              height={32}
+              className="size-8 rounded-lg"
+            />
             <span className="font-display text-lg font-semibold">P2P Lab</span>
           </Link>
           <nav className="flex flex-1 flex-col gap-1">
@@ -59,7 +73,12 @@ export function AppShell({ title, subtitle, children }: { title: string; subtitl
           </nav>
           <div className="mt-4 border-t border-sidebar-border pt-3">
             <p className="truncate px-3 pb-2 text-xs text-muted-foreground">{user?.email}</p>
-            <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleSignOut}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              onClick={handleSignOut}
+            >
               <LogOut className="size-4" /> Cerrar sesión
             </Button>
           </div>
@@ -70,7 +89,9 @@ export function AppShell({ title, subtitle, children }: { title: string; subtitl
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="truncate font-display text-xl font-semibold lg:text-2xl">{title}</h1>
-                {subtitle ? <p className="truncate text-sm text-muted-foreground">{subtitle}</p> : null}
+                {subtitle ? (
+                  <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
+                ) : null}
               </div>
               <Button variant="outline" size="sm" className="lg:hidden" onClick={handleSignOut}>
                 <LogOut className="size-4" />
@@ -87,7 +108,9 @@ export function AppShell({ title, subtitle, children }: { title: string; subtitl
           <Link
             key={item.to}
             to={item.to}
-            className={cn("flex flex-col items-center gap-1 px-1 py-2 text-[11px] text-muted-foreground")}
+            className={cn(
+              "flex flex-col items-center gap-1 px-1 py-2 text-[11px] text-muted-foreground",
+            )}
             activeProps={{ className: "text-primary font-medium" }}
           >
             <item.icon className="size-5" />

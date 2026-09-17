@@ -12,7 +12,13 @@ import { SimulateDialog, type SimulationTarget } from "@/components/SimulateDial
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useOverview } from "@/hooks/useOverview";
 import { searchOpportunities, type OpportunityDTO, type QuotaState } from "@/lib/api.functions";
 import { formatMoney, formatPct } from "@/lib/accounting";
@@ -22,7 +28,11 @@ export const Route = createFileRoute("/_authenticated/oportunidades")({
   head: () => ({
     meta: [
       { title: "Oportunidades P2P — P2P Lab" },
-      { name: "description", content: "Busca y compara ofertas y demandas P2P de criptomonedas por activo, moneda, importe y método de pago." },
+      {
+        name: "description",
+        content:
+          "Busca y compara ofertas y demandas P2P de criptomonedas por activo, moneda, importe y método de pago.",
+      },
       { property: "og:title", content: "Oportunidades P2P — P2P Lab" },
       { property: "og:description", content: "Busca y compara ofertas P2P de criptomonedas." },
       { name: "robots", content: "noindex" },
@@ -72,7 +82,8 @@ function OpportunitiesPage() {
         return;
       }
       setResults(result.opportunities);
-      if (result.opportunities.length === 0) toast.info("No hemos encontrado oportunidades con estos filtros.");
+      if (result.opportunities.length === 0)
+        toast.info("No hemos encontrado oportunidades con estos filtros.");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -90,7 +101,8 @@ function OpportunitiesPage() {
       opportunityId: opportunity.id,
       providerName: opportunity.provider_name,
       availableCash: cash,
-      availableQuantity: overview?.positions.find((p) => p.asset === opportunity.asset)?.quantity ?? 0,
+      availableQuantity:
+        overview?.positions.find((p) => p.asset === opportunity.asset)?.quantity ?? 0,
     });
     setDialogOpen(true);
   };
@@ -104,7 +116,9 @@ function OpportunitiesPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <Field label="Operación">
               <Select value={side} onValueChange={(v) => setSide(v as "buy" | "sell")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="buy">Comprar crypto</SelectItem>
                   <SelectItem value="sell">Vender crypto</SelectItem>
@@ -113,45 +127,68 @@ function OpportunitiesPage() {
             </Field>
             <Field label="Activo">
               <Select value={asset} onValueChange={setAsset}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ASSETS.map((a) => (
-                    <SelectItem key={a} value={a}>{a}</SelectItem>
+                    <SelectItem key={a} value={a}>
+                      {a}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
             <Field label="Moneda">
               <Select value={fiat} onValueChange={setFiat}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {FIATS.map((f) => (
-                    <SelectItem key={f} value={f}>{f}</SelectItem>
+                    <SelectItem key={f} value={f}>
+                      {f}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
             <Field label="Importe">
-              <Input inputMode="decimal" placeholder="100" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <Input
+                inputMode="decimal"
+                placeholder="100"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
             </Field>
             <Field label="Método de pago">
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Cualquiera</SelectItem>
                   {PAYMENT_METHODS.map((m) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
           </div>
-          <Button className="mt-4 w-full sm:w-auto" size="lg" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          <Button
+            className="mt-4 w-full sm:w-auto"
+            size="lg"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
             {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
             Buscar oportunidades
           </Button>
           <p className="mt-2 text-xs text-muted-foreground">
-            Cada búsqueda consume una unidad de tu cuota y devuelve hasta 10 oportunidades. Las simulaciones son ilimitadas.
+            Cada búsqueda consume una unidad de tu cuota y devuelve hasta 10 oportunidades. Las
+            simulaciones son ilimitadas.
           </p>
         </div>
 
@@ -184,7 +221,9 @@ function OpportunitiesPage() {
             }
             action={
               currentQuota && currentQuota.limit >= 0 && currentQuota.remaining <= 0 ? (
-                <Button asChild><Link to="/planes">Actualizar a Premium</Link></Button>
+                <Button asChild>
+                  <Link to="/planes">Actualizar a Premium</Link>
+                </Button>
               ) : null
             }
           />
@@ -224,7 +263,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function OpportunityCard({ opportunity, onSimulate }: { opportunity: OpportunityDTO; onSimulate: () => void }) {
+function OpportunityCard({
+  opportunity,
+  onSimulate,
+}: {
+  opportunity: OpportunityDTO;
+  onSimulate: () => void;
+}) {
   const digits = opportunity.price < 10 ? 4 : 2;
   return (
     <article className="surface-card flex flex-col gap-3 p-4">
@@ -233,7 +278,9 @@ function OpportunityCard({ opportunity, onSimulate }: { opportunity: Opportunity
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             {opportunity.side === "buy" ? "Comprar" : "Vender"} {opportunity.asset}
           </p>
-          <p className="num text-2xl font-semibold">{formatMoney(opportunity.price, opportunity.fiat, digits)}</p>
+          <p className="num text-2xl font-semibold">
+            {formatMoney(opportunity.price, opportunity.fiat, digits)}
+          </p>
           <p className="text-sm text-muted-foreground">{opportunity.provider_name}</p>
         </div>
         <DataModeBadge mode={opportunity.data_mode} />
@@ -251,17 +298,29 @@ function OpportunityCard({ opportunity, onSimulate }: { opportunity: Opportunity
         />
         <Detail
           label="Precio de referencia"
-          value={opportunity.reference_price ? formatMoney(opportunity.reference_price, opportunity.fiat, digits) : "—"}
+          value={
+            opportunity.reference_price
+              ? formatMoney(opportunity.reference_price, opportunity.fiat, digits)
+              : "—"
+          }
         />
         <Detail
           label="Diferencia"
           value={opportunity.spread_pct === null ? "—" : formatPct(opportunity.spread_pct)}
-          tone={opportunity.spread_pct === null ? undefined : opportunity.spread_pct >= 0 ? "positive" : "negative"}
+          tone={
+            opportunity.spread_pct === null
+              ? undefined
+              : opportunity.spread_pct >= 0
+                ? "positive"
+                : "negative"
+          }
         />
       </dl>
 
       <div className="mt-auto flex flex-wrap gap-2">
-        <Button onClick={onSimulate} className="flex-1 sm:flex-none">Simular</Button>
+        <Button onClick={onSimulate} className="flex-1 sm:flex-none">
+          Simular
+        </Button>
         {opportunity.data_mode === "real" && opportunity.source_url ? (
           <Button asChild variant="outline" className="flex-1 sm:flex-none">
             <a href={opportunity.source_url} target="_blank" rel="noopener noreferrer">
@@ -269,7 +328,9 @@ function OpportunityCard({ opportunity, onSimulate }: { opportunity: Opportunity
             </a>
           </Button>
         ) : (
-          <span className="self-center text-xs text-muted-foreground">Oportunidad demo: no hay proveedor real.</span>
+          <span className="self-center text-xs text-muted-foreground">
+            Oportunidad demo: no hay proveedor real.
+          </span>
         )}
       </div>
     </article>
@@ -288,7 +349,9 @@ function Detail({
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className={`num text-sm ${tone === "positive" ? "text-success" : tone === "negative" ? "text-destructive" : ""}`}>
+      <dd
+        className={`num text-sm ${tone === "positive" ? "text-success" : tone === "negative" ? "text-destructive" : ""}`}
+      >
         {value}
       </dd>
     </div>
