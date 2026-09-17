@@ -10,33 +10,158 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedCarteraRouteImport } from './routes/_authenticated/cartera'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedEstadisticasRouteImport } from './routes/_authenticated/estadisticas'
+import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
+import { Route as AuthenticatedOportunidadesRouteImport } from './routes/_authenticated/oportunidades'
+import { Route as AuthenticatedPlanesRouteImport } from './routes/_authenticated/planes'
+import { Route as AuthenticatedSeguridadRouteImport } from './routes/_authenticated/seguridad'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCarteraRoute = AuthenticatedCarteraRouteImport.update({
+  id: '/cartera',
+  path: '/cartera',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEstadisticasRoute =
+  AuthenticatedEstadisticasRouteImport.update({
+    id: '/estadisticas',
+    path: '/estadisticas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOperacionesRoute =
+  AuthenticatedOperacionesRouteImport.update({
+    id: '/operaciones',
+    path: '/operaciones',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOportunidadesRoute =
+  AuthenticatedOportunidadesRouteImport.update({
+    id: '/oportunidades',
+    path: '/oportunidades',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPlanesRoute = AuthenticatedPlanesRouteImport.update({
+  id: '/planes',
+  path: '/planes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSeguridadRoute = AuthenticatedSeguridadRouteImport.update({
+  id: '/seguridad',
+  path: '/seguridad',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/cartera': typeof AuthenticatedCarteraRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/estadisticas': typeof AuthenticatedEstadisticasRoute
+  '/operaciones': typeof AuthenticatedOperacionesRoute
+  '/oportunidades': typeof AuthenticatedOportunidadesRoute
+  '/planes': typeof AuthenticatedPlanesRoute
+  '/seguridad': typeof AuthenticatedSeguridadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/cartera': typeof AuthenticatedCarteraRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/estadisticas': typeof AuthenticatedEstadisticasRoute
+  '/operaciones': typeof AuthenticatedOperacionesRoute
+  '/oportunidades': typeof AuthenticatedOportunidadesRoute
+  '/planes': typeof AuthenticatedPlanesRoute
+  '/seguridad': typeof AuthenticatedSeguridadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/cartera': typeof AuthenticatedCarteraRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/estadisticas': typeof AuthenticatedEstadisticasRoute
+  '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
+  '/_authenticated/oportunidades': typeof AuthenticatedOportunidadesRoute
+  '/_authenticated/planes': typeof AuthenticatedPlanesRoute
+  '/_authenticated/seguridad': typeof AuthenticatedSeguridadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/cartera'
+    | '/dashboard'
+    | '/estadisticas'
+    | '/operaciones'
+    | '/oportunidades'
+    | '/planes'
+    | '/seguridad'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/cartera'
+    | '/dashboard'
+    | '/estadisticas'
+    | '/operaciones'
+    | '/oportunidades'
+    | '/planes'
+    | '/seguridad'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/reset-password'
+    | '/_authenticated/cartera'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/estadisticas'
+    | '/_authenticated/operaciones'
+    | '/_authenticated/oportunidades'
+    | '/_authenticated/planes'
+    | '/_authenticated/seguridad'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +173,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/cartera': {
+      id: '/_authenticated/cartera'
+      path: '/cartera'
+      fullPath: '/cartera'
+      preLoaderRoute: typeof AuthenticatedCarteraRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/estadisticas': {
+      id: '/_authenticated/estadisticas'
+      path: '/estadisticas'
+      fullPath: '/estadisticas'
+      preLoaderRoute: typeof AuthenticatedEstadisticasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/operaciones': {
+      id: '/_authenticated/operaciones'
+      path: '/operaciones'
+      fullPath: '/operaciones'
+      preLoaderRoute: typeof AuthenticatedOperacionesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/oportunidades': {
+      id: '/_authenticated/oportunidades'
+      path: '/oportunidades'
+      fullPath: '/oportunidades'
+      preLoaderRoute: typeof AuthenticatedOportunidadesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/planes': {
+      id: '/_authenticated/planes'
+      path: '/planes'
+      fullPath: '/planes'
+      preLoaderRoute: typeof AuthenticatedPlanesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seguridad': {
+      id: '/_authenticated/seguridad'
+      path: '/seguridad'
+      fullPath: '/seguridad'
+      preLoaderRoute: typeof AuthenticatedSeguridadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCarteraRoute: typeof AuthenticatedCarteraRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEstadisticasRoute: typeof AuthenticatedEstadisticasRoute
+  AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
+  AuthenticatedOportunidadesRoute: typeof AuthenticatedOportunidadesRoute
+  AuthenticatedPlanesRoute: typeof AuthenticatedPlanesRoute
+  AuthenticatedSeguridadRoute: typeof AuthenticatedSeguridadRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCarteraRoute: AuthenticatedCarteraRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEstadisticasRoute: AuthenticatedEstadisticasRoute,
+  AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
+  AuthenticatedOportunidadesRoute: AuthenticatedOportunidadesRoute,
+  AuthenticatedPlanesRoute: AuthenticatedPlanesRoute,
+  AuthenticatedSeguridadRoute: AuthenticatedSeguridadRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
