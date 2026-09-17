@@ -46,25 +46,8 @@ export const getSubscription = createServerFn({ method: "GET" })
 
 const ALLOWED_PRICE_IDS = new Set(["p2plab_premium_monthly", "p2plab_premium_yearly"]);
 
-/** Devuelve la suscripción vigente del usuario (activa o en periodo de gracia). */
-async function getCurrentSubscription(
-  supabase: {
-    from: (table: string) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  },
-  userId: string,
-  environment: string,
-) {
-  const { data: row, error } = await supabase
-    .from("subscriptions")
-    .select("paddle_subscription_id, status, current_period_end, cancel_at_period_end")
-    .eq("user_id", userId)
-    .eq("environment", environment)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  return row;
-}
+const SUBSCRIPTION_COLUMNS =
+  "paddle_subscription_id, status, current_period_end, cancel_at_period_end";
 
 /**
  * Cancela la suscripción: se programa al final del periodo ya pagado,
