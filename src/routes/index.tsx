@@ -64,7 +64,7 @@ function Landing() {
             <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight sm:text-5xl">
               P2P Lab
             </h1>
-            <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+            <p className="hero-muted mt-4 max-w-2xl text-lg">
               Analiza oportunidades de compra y venta P2P de criptomonedas en varias plataformas y
               practica con capital virtual antes de arriesgar dinero real.
             </p>
@@ -76,7 +76,7 @@ function Landing() {
                 <a href="#como-funciona">Ver cómo funciona</a>
               </Button>
             </div>
-            <p className="mt-6 max-w-xl text-sm text-muted-foreground">{SIMULATION_DISCLAIMER}</p>
+            <p className="hero-muted mt-6 max-w-xl text-sm">{SIMULATION_DISCLAIMER}</p>
           </div>
         </section>
 
