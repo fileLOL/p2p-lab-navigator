@@ -137,8 +137,8 @@ function PrivacidadPage() {
                 Puedes ejercer los derechos de acceso, rectificación, supresión, limitación,
                 portabilidad y oposición, así como retirar el consentimiento, escribiéndonos a
                 través del servicio. Responderemos en el plazo de un mes. También tienes derecho
-                a reclamar ante la autoridad de control (en España, la Agencia Española de
-                Protección de Datos).
+                a reclamar ante la autoridad de control (en los Países Bajos, la Autoriteit
+                Persoonsgegevens, o la autoridad de tu país de residencia).
               </p>
             </Section>
 
