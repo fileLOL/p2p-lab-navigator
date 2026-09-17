@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -113,17 +113,9 @@ function PlansPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const buy = async (plan: Exclude<PlanId, "free">) => {
+  const buy = (plan: Exclude<PlanId, "free">) => {
     if (!user) return;
-    try {
-      await openCheckout({
-        priceId: PRICE_IDS[plan],
-        userId: user.id,
-        ...(user.email ? { customerEmail: user.email } : {}),
-      });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se ha podido abrir el pago.");
-    }
+    setCheckoutPriceId(PRICE_IDS[plan]);
   };
 
   const autoStarted = useRef(false);
@@ -135,7 +127,7 @@ function PlansPage() {
     );
     if (!match) return;
     autoStarted.current = true;
-    void buy(match);
+    buy(match);
   }, [user]);
 
 
@@ -222,7 +214,7 @@ function PlansPage() {
                   <Button
                     className="mt-5 w-full"
                     variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent || checkoutLoading || switchMutation.isPending}
+                    disabled={isCurrent || switchMutation.isPending}
                     onClick={() => {
                       if (hasActiveSubscription && !pendingCancel) {
                         switchMutation.mutate(PRICE_IDS[id]);
@@ -253,6 +245,18 @@ function PlansPage() {
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
           los planes, también cuando agotas la cuota de búsquedas.
         </p>
+
+        <StripeCheckoutDialog
+          priceId={checkoutPriceId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCheckoutPriceId(null);
+              invalidate();
+              void subscription.refetch();
+            }
+          }}
+          returnUrl={`${window.location.origin}/planes`}
+        />
       </div>
     </AppShell>
   );
