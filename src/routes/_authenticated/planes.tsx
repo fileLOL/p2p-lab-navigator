@@ -136,7 +136,6 @@ function PlansPage() {
     if (!match) return;
     autoStarted.current = true;
     void buy(match);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
 
