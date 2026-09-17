@@ -170,6 +170,11 @@
 
 @utility gradient-hero {
   background-image: var(--gradient-hero);
+  color: var(--color-hero-foreground);
+}
+
+@utility hero-muted {
+  color: color-mix(in oklab, var(--color-hero-foreground) 78%, transparent);
 }
 
 @utility num {
