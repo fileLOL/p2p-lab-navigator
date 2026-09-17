@@ -87,8 +87,8 @@ function PrivacidadPage() {
                 </li>
               </ul>
               <p>
-                Los datos de pago los recoge y trata directamente Paddle como Merchant of Record;
-                no almacenamos los datos de tu tarjeta.
+                Los datos de pago los recoge y trata directamente nuestro proveedor de pagos, que
+                gestiona el cobro y la facturación; no almacenamos los datos de tu tarjeta.
               </p>
             </Section>
 
@@ -107,7 +107,7 @@ function PrivacidadPage() {
                   herramientas de soporte).
                 </li>
                 <li>
-                  Paddle, como Merchant of Record, para la venta del producto, gestión de
+                  Nuestro proveedor de pagos, para la venta del producto, gestión de
                   suscripciones, cobros, cumplimiento fiscal y facturación.
                 </li>
                 <li>Asesores profesionales (legales, contables) cuando sea necesario.</li>

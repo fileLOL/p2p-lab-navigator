@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
 
+// Stripe (managed payments) webhook receiver — handles customer.subscription.* events.
+
 let cachedClient: SupabaseClient | null = null;
 function getSupabase(): SupabaseClient {
   if (!cachedClient) {

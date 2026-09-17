@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,13 +7,13 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { StripeCheckoutDialog } from "@/components/StripeCheckoutDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateOverview, useOverview } from "@/hooks/useOverview";
-import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
-import { getPaddleEnvironment } from "@/lib/paddle";
+import { getStripeEnvironment } from "@/lib/stripe";
 import {
   cancelSubscription,
   changeSubscriptionPlan,
@@ -49,14 +49,14 @@ function PlansPage() {
   const { data } = useOverview();
   const { user } = useAuth();
   const invalidate = useInvalidateOverview();
-  const environment = getPaddleEnvironment();
+  const environment = getStripeEnvironment();
 
   const downgrade = useServerFn(changePlan);
   const cancelFn = useServerFn(cancelSubscription);
   const switchFn = useServerFn(changeSubscriptionPlan);
   const subscriptionFn = useServerFn(getSubscription);
   const portalFn = useServerFn(getBillingPortalUrl);
-  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
 
   const current = (data?.profile?.plan ?? "free") as PlanId;
 
@@ -113,17 +113,9 @@ function PlansPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const buy = async (plan: Exclude<PlanId, "free">) => {
+  const buy = (plan: Exclude<PlanId, "free">) => {
     if (!user) return;
-    try {
-      await openCheckout({
-        priceId: PRICE_IDS[plan],
-        userId: user.id,
-        ...(user.email ? { customerEmail: user.email } : {}),
-      });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se ha podido abrir el pago.");
-    }
+    setCheckoutPriceId(PRICE_IDS[plan]);
   };
 
   const autoStarted = useRef(false);
@@ -135,7 +127,7 @@ function PlansPage() {
     );
     if (!match) return;
     autoStarted.current = true;
-    void buy(match);
+    buy(match);
   }, [user]);
 
 
@@ -222,7 +214,7 @@ function PlansPage() {
                   <Button
                     className="mt-5 w-full"
                     variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent || checkoutLoading || switchMutation.isPending}
+                    disabled={isCurrent || switchMutation.isPending}
                     onClick={() => {
                       if (hasActiveSubscription && !pendingCancel) {
                         switchMutation.mutate(PRICE_IDS[id]);
@@ -253,6 +245,17 @@ function PlansPage() {
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
           los planes, también cuando agotas la cuota de búsquedas.
         </p>
+
+        <StripeCheckoutDialog
+          priceId={checkoutPriceId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCheckoutPriceId(null);
+              invalidate();
+              void subscription.refetch();
+            }
+          }}
+        />
       </div>
     </AppShell>
   );

@@ -14,7 +14,7 @@ export const Route = createFileRoute("/terminos")({
       {
         property: "og:description",
         content:
-          "Condiciones de uso de P2P Lab: contratación, uso aceptable, planes y pagos gestionados por Paddle como Merchant of Record.",
+          "Condiciones de uso de P2P Lab: contratación, uso aceptable, planes y pagos procesados de forma segura por nuestro proveedor de pagos.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -119,32 +119,16 @@ function TerminosPage() {
 
             <Section title="7. Pagos y suscripciones">
               <p>
-                Nuestro proceso de pedido lo realiza nuestro revendedor en línea Paddle.com.
-                Paddle.com es el Merchant of Record de todos nuestros pedidos. Paddle gestiona
-                todas las consultas de atención al cliente y las devoluciones.
+                Los pagos se procesan de forma segura a través de nuestro proveedor de pagos, que
+                gestiona el cobro, la facturación, los impuestos y las devoluciones; no
+                almacenamos los datos de tu tarjeta.
               </p>
               <p>
-                El pago, la facturación, los impuestos, las renovaciones, la cancelación y las
-                devoluciones se rigen por las{" "}
-                <a
-                  href="https://www.paddle.com/legal/checkout-buyer-terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Condiciones del Comprador de Paddle
-                </a>
-                . Las suscripciones se renuevan automáticamente (mensual o anual según el plan) y
-                puedes cancelarlas en cualquier momento desde la sección de planes o a través de{" "}
-                <a
-                  href="https://paddle.net"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  paddle.net
-                </a>
-                ; al cancelar, mantienes el acceso hasta el final del periodo pagado.
+                Las suscripciones se renuevan automáticamente (mensual o anual según el plan) y
+                puedes cancelarlas en cualquier momento desde la sección de planes o desde el
+                portal de facturación; al cancelar, mantienes el acceso hasta el final del periodo
+                pagado. Los cambios entre el plan Mensual y el Anual se aplican en tu próxima
+                renovación, sin cargos ni reembolsos parciales en el periodo en curso.
               </p>
             </Section>
 
