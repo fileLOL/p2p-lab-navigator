@@ -1,8 +1,7 @@
 # Roadmap
 
-- [x] Activar pagos con Stripe y recrear el producto Premium (mensual/anual)
-- [ ] Sustituir integración de pago cliente/servidor por Stripe (checkout embebido)
-- [ ] Webhook de Stripe y migración de columnas de `subscriptions`
-- [ ] Actualizar textos legales (vendedor Fundación P2P, reembolsos sin paddle.net)
-- [ ] Verificar en navegador: alta, pago de prueba, cancelación y cambio de plan
+- [ ] Corregir confirmación automática de pagos: revisar eventos del webhook de Stripe y re-registrar si los nombres son incorrectos; añadir `checkout.session.completed` como respaldo
+- [ ] Verificación E2E: compra de prueba, activación en Planes, cancelación y cambio Mensual ↔ Anual
+- [ ] Pendiente Stripe: terminar verificación de la cuenta para crear claves live (acción del usuario en Stripe)
+- [ ] Activar live: crear claves live y publicar (cuando Stripe lo permita)
 - [ ] Pendiente usuario: dominio de correo para el email de bienvenida
