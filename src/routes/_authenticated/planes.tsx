@@ -13,7 +13,12 @@ import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { getBillingPortalUrl, getSubscription } from "@/lib/payments.functions";
+import {
+  cancelSubscription,
+  changeSubscriptionPlan,
+  getBillingPortalUrl,
+  getSubscription,
+} from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/planes")({
   head: () => ({
@@ -46,6 +51,8 @@ function PlansPage() {
   const environment = getPaddleEnvironment();
 
   const downgrade = useServerFn(changePlan);
+  const cancelFn = useServerFn(cancelSubscription);
+  const switchFn = useServerFn(changeSubscriptionPlan);
   const subscriptionFn = useServerFn(getSubscription);
   const portalFn = useServerFn(getBillingPortalUrl);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
@@ -58,11 +65,42 @@ function PlansPage() {
     staleTime: 15_000,
   });
 
+  const hasActiveSubscription = Boolean(
+    subscription.data && subscription.data.status !== "canceled",
+  );
+  const pendingCancel = Boolean(subscription.data?.cancel_at_period_end);
+
   const cancelMutation = useMutation({
+    mutationFn: () => cancelFn({ data: { environment } }),
+    onSuccess: (result) => {
+      const end = result.current_period_end
+        ? new Date(result.current_period_end).toLocaleDateString("es-ES")
+        : null;
+      toast.success(
+        end
+          ? `Suscripción cancelada. Mantienes tu plan hasta el ${end}.`
+          : "Suscripción cancelada al final del periodo pagado.",
+      );
+      invalidate();
+      void subscription.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const downgradeMutation = useMutation({
     mutationFn: () => downgrade({ data: { plan: "free" } }),
     onSuccess: () => {
       toast.success("Has vuelto al plan Gratis.");
       invalidate();
+      void subscription.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const switchMutation = useMutation({
+    mutationFn: (priceId: string) => switchFn({ data: { environment, priceId } }),
+    onSuccess: () => {
+      toast.success("Cambio programado: se aplicará en tu próxima renovación.");
       void subscription.refetch();
     },
     onError: (error: Error) => toast.error(error.message),
@@ -87,21 +125,23 @@ function PlansPage() {
     }
   };
 
-  const hasSubscription = Boolean(subscription.data);
-
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">
         <PaymentTestModeBanner />
 
-        {hasSubscription && (
+        {hasActiveSubscription && (
           <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
             <div>
-              <p className="font-medium">Suscripción activa</p>
+              <p className="font-medium">
+                {pendingCancel ? "Suscripción cancelada" : "Suscripción activa"}
+              </p>
               <p className="text-muted-foreground">
-                Estado: {subscription.data?.status}
+                {pendingCancel
+                  ? "Mantienes tu plan hasta el final del periodo pagado"
+                  : `Estado: ${subscription.data?.status}`}
                 {subscription.data?.current_period_end
-                  ? ` · Renovación: ${new Date(subscription.data.current_period_end).toLocaleDateString("es-ES")}`
+                  ? ` · ${pendingCancel ? "Acceso hasta" : "Renovación"}: ${new Date(subscription.data.current_period_end).toLocaleDateString("es-ES")}`
                   : ""}
               </p>
             </div>
@@ -148,19 +188,40 @@ function PlansPage() {
                   <Button
                     className="mt-5 w-full"
                     variant="outline"
-                    disabled={isCurrent || cancelMutation.isPending}
-                    onClick={() => cancelMutation.mutate()}
+                    disabled={
+                      isCurrent ||
+                      pendingCancel ||
+                      cancelMutation.isPending ||
+                      downgradeMutation.isPending
+                    }
+                    onClick={() =>
+                      hasActiveSubscription ? cancelMutation.mutate() : downgradeMutation.mutate()
+                    }
                   >
-                    {isCurrent ? "Plan actual" : "Volver a gratis"}
+                    {isCurrent
+                      ? "Plan actual"
+                      : hasActiveSubscription
+                        ? "Cancelar suscripción"
+                        : "Volver a gratis"}
                   </Button>
                 ) : (
                   <Button
                     className="mt-5 w-full"
                     variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent || checkoutLoading}
-                    onClick={() => void buy(id)}
+                    disabled={isCurrent || checkoutLoading || switchMutation.isPending}
+                    onClick={() => {
+                      if (hasActiveSubscription && !pendingCancel) {
+                        switchMutation.mutate(PRICE_IDS[id]);
+                      } else {
+                        void buy(id);
+                      }
+                    }}
                   >
-                    {isCurrent ? "Plan actual" : `Suscribirme por ${plan.price}`}
+                    {isCurrent
+                      ? "Plan actual"
+                      : hasActiveSubscription && !pendingCancel
+                        ? `Cambiar a ${plan.name} (al renovar)`
+                        : `Suscribirme por ${plan.price}`}
                   </Button>
                 )}
               </article>
@@ -170,8 +231,9 @@ function PlansPage() {
 
         <p className="text-xs text-muted-foreground">
           El pago se procesa de forma segura por nuestro proveedor, que actúa como vendedor
-          autorizado y emite la factura. Puedes cancelar cuando quieras desde «Gestionar
-          suscripción»; mantendrás el plan hasta el final del periodo pagado.
+          autorizado y emite la factura. Puedes cancelar cuando quieras; mantendrás el plan hasta el
+          final del periodo pagado. Los cambios entre Mensual y Anual se aplican en tu próxima
+          renovación, sin cargos parciales.
         </p>
         <p className="text-xs text-muted-foreground">
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
