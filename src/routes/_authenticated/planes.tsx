@@ -125,21 +125,23 @@ function PlansPage() {
     }
   };
 
-  const hasSubscription = Boolean(subscription.data);
-
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">
         <PaymentTestModeBanner />
 
-        {hasSubscription && (
+        {hasActiveSubscription && (
           <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
             <div>
-              <p className="font-medium">Suscripción activa</p>
+              <p className="font-medium">
+                {pendingCancel ? "Suscripción cancelada" : "Suscripción activa"}
+              </p>
               <p className="text-muted-foreground">
-                Estado: {subscription.data?.status}
+                {pendingCancel
+                  ? "Mantienes tu plan hasta el final del periodo pagado"
+                  : `Estado: ${subscription.data?.status}`}
                 {subscription.data?.current_period_end
-                  ? ` · Renovación: ${new Date(subscription.data.current_period_end).toLocaleDateString("es-ES")}`
+                  ? ` · ${pendingCancel ? "Acceso hasta" : "Renovación"}: ${new Date(subscription.data.current_period_end).toLocaleDateString("es-ES")}`
                   : ""}
               </p>
             </div>
