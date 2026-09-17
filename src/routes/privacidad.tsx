@@ -54,9 +54,10 @@ function PrivacidadPage() {
           <CardContent className="space-y-6 p-6">
             <Section title="1. Responsable del tratamiento">
               <p>
-                El responsable del tratamiento de tus datos personales es P2P Lab («el
-                responsable», «nosotros»). Actuamos como responsable de los datos recogidos a
-                través del servicio.
+                El responsable del tratamiento de tus datos personales es Fundación P2P, con
+                domicilio en Realengracht 196, 1013AV, Ámsterdam, Países Bajos, que opera bajo la
+                marca comercial P2P Lab («el responsable», «nosotros»). Actuamos como responsable
+                de los datos recogidos a través del servicio.
               </p>
             </Section>
 
