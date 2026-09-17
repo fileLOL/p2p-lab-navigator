@@ -54,9 +54,11 @@ function TerminosPage() {
           <CardContent className="space-y-6 p-6">
             <Section title="1. Partes y aceptación">
               <p>
-                Estos términos regulan el uso de P2P Lab («el servicio»), ofrecido por P2P Lab
-                («el vendedor», «nosotros»). Al registrarte o usar el servicio, contratas con el
-                vendedor y aceptas estos términos. Si no estás de acuerdo, no uses el servicio.
+                Estos términos regulan el uso de P2P Lab («el servicio»), ofrecido por Fundación
+                P2P, con domicilio en Realengracht 196, 1013AV, Ámsterdam, Países Bajos («el
+                vendedor», «nosotros»), que opera bajo la marca comercial P2P Lab. Al registrarte
+                o usar el servicio, contratas con el vendedor y aceptas estos términos. Si no
+                estás de acuerdo, no uses el servicio.
               </p>
               <p>
                 Declaras tener la edad legal para contratar o, si actúas para una organización,
@@ -170,8 +172,8 @@ function TerminosPage() {
 
             <Section title="10. Legislación aplicable">
               <p>
-                Estos términos se rigen por la legislación española, con sometimiento a los
-                juzgados y tribunales que correspondan conforme a derecho.
+                Estos términos se rigen por la legislación de los Países Bajos, con sometimiento
+                a los juzgados y tribunales que correspondan conforme a derecho.
               </p>
             </Section>
           </CardContent>
