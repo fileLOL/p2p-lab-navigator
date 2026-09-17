@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedCarteraRouteImport } from './routes/_authenticated/cartera'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
 import { Route as AuthenticatedOportunidadesRouteImport } from './routes/_authenticated/oportunidades'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,11 +37,22 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCarteraRoute = AuthenticatedCarteraRouteImport.update({
+  id: '/cartera',
+  path: '/cartera',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOperacionesRoute =
+  AuthenticatedOperacionesRouteImport.update({
+    id: '/operaciones',
+    path: '/operaciones',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOportunidadesRoute =
   AuthenticatedOportunidadesRouteImport.update({
     id: '/oportunidades',
@@ -51,14 +64,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/cartera': typeof AuthenticatedCarteraRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/operaciones': typeof AuthenticatedOperacionesRoute
   '/oportunidades': typeof AuthenticatedOportunidadesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/cartera': typeof AuthenticatedCarteraRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/operaciones': typeof AuthenticatedOperacionesRoute
   '/oportunidades': typeof AuthenticatedOportunidadesRoute
 }
 export interface FileRoutesById {
@@ -67,21 +84,39 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/cartera': typeof AuthenticatedCarteraRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
   '/_authenticated/oportunidades': typeof AuthenticatedOportunidadesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/oportunidades'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/cartera'
+    | '/dashboard'
+    | '/operaciones'
+    | '/oportunidades'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/dashboard' | '/oportunidades'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/cartera'
+    | '/dashboard'
+    | '/operaciones'
+    | '/oportunidades'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/cartera'
     | '/_authenticated/dashboard'
+    | '/_authenticated/operaciones'
     | '/_authenticated/oportunidades'
   fileRoutesById: FileRoutesById
 }
@@ -122,11 +157,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/cartera': {
+      id: '/_authenticated/cartera'
+      path: '/cartera'
+      fullPath: '/cartera'
+      preLoaderRoute: typeof AuthenticatedCarteraRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/operaciones': {
+      id: '/_authenticated/operaciones'
+      path: '/operaciones'
+      fullPath: '/operaciones'
+      preLoaderRoute: typeof AuthenticatedOperacionesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/oportunidades': {
@@ -140,12 +189,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCarteraRoute: typeof AuthenticatedCarteraRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
   AuthenticatedOportunidadesRoute: typeof AuthenticatedOportunidadesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCarteraRoute: AuthenticatedCarteraRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
   AuthenticatedOportunidadesRoute: AuthenticatedOportunidadesRoute,
 }
 
