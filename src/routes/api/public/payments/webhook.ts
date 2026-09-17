@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
+import { createStripeClient, verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
 
 // Stripe (managed payments) webhook receiver — handles customer.subscription.* events.
 
