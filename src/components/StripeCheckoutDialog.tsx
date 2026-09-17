@@ -8,16 +8,19 @@ import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 interface Props {
   priceId: string | null;
   onOpenChange: (open: boolean) => void;
-  returnUrl: string;
 }
 
-export function StripeCheckoutDialog({ priceId, onOpenChange, returnUrl }: Props) {
+export function StripeCheckoutDialog({ priceId, onOpenChange }: Props) {
   const createSession = useServerFn(createCheckoutSession);
 
   const fetchClientSecret = async (): Promise<string> => {
     if (!priceId) throw new Error("Plan no válido.");
     const result = await createSession({
-      data: { priceId, environment: getStripeEnvironment(), returnUrl },
+      data: {
+        priceId,
+        environment: getStripeEnvironment(),
+        returnUrl: `${window.location.origin}/planes`,
+      },
     });
     if ("error" in result) throw new Error(result.error);
     if (!result.clientSecret) throw new Error("No se ha podido iniciar el pago.");

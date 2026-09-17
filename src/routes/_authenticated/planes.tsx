@@ -255,7 +255,6 @@ function PlansPage() {
               void subscription.refetch();
             }
           }}
-          returnUrl={`${window.location.origin}/planes`}
         />
       </div>
     </AppShell>
