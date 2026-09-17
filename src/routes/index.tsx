@@ -159,7 +159,8 @@ function Landing() {
             })}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            Los pagos son simulados durante esta fase: no se realiza ningún cargo.
+            Los planes de pago se contratan con pago seguro y se pueden cancelar cuando quieras. El
+            paper trading siempre usa capital virtual.
           </p>
         </section>
 

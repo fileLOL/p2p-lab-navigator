@@ -1,14 +1,19 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateOverview, useOverview } from "@/hooks/useOverview";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { getBillingPortalUrl, getSubscription } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/planes")({
   head: () => ({
@@ -29,31 +34,86 @@ export const Route = createFileRoute("/_authenticated/planes")({
 
 const ORDER: PlanId[] = ["free", "monthly", "yearly"];
 
+const PRICE_IDS: Record<Exclude<PlanId, "free">, string> = {
+  monthly: "p2plab_premium_monthly",
+  yearly: "p2plab_premium_yearly",
+};
+
 function PlansPage() {
   const { data } = useOverview();
+  const { user } = useAuth();
   const invalidate = useInvalidateOverview();
-  const fn = useServerFn(changePlan);
+  const environment = getPaddleEnvironment();
+
+  const downgrade = useServerFn(changePlan);
+  const subscriptionFn = useServerFn(getSubscription);
+  const portalFn = useServerFn(getBillingPortalUrl);
+  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+
   const current = (data?.profile?.plan ?? "free") as PlanId;
 
-  const mutation = useMutation({
-    mutationFn: (plan: PlanId) => fn({ data: { plan } }),
-    onSuccess: (_result, plan) => {
-      toast.success(`Plan ${PLANS[plan].name} activado (pago simulado).`);
+  const subscription = useQuery({
+    queryKey: ["subscription", environment],
+    queryFn: () => subscriptionFn({ data: { environment } }),
+    staleTime: 15_000,
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => downgrade({ data: { plan: "free" } }),
+    onSuccess: () => {
+      toast.success("Has vuelto al plan Gratis.");
       invalidate();
+      void subscription.refetch();
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const portalMutation = useMutation({
+    mutationFn: () => portalFn({ data: { environment } }),
+    onSuccess: (result) => window.open(result.url, "_blank", "noopener,noreferrer"),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const buy = async (plan: Exclude<PlanId, "free">) => {
+    if (!user) return;
+    try {
+      await openCheckout({
+        priceId: PRICE_IDS[plan],
+        userId: user.id,
+        ...(user.email ? { customerEmail: user.email } : {}),
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se ha podido abrir el pago.");
+    }
+  };
+
+  const hasSubscription = Boolean(subscription.data);
+
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">
-        <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
-          <p className="font-medium">Pagos simulados</p>
-          <p className="mt-1 text-muted-foreground">
-            Todavía no hay cobros reales. Al cambiar de plan activas la cuota correspondiente en
-            modo demostración; no se realiza ningún cargo ni se solicitan datos de pago.
-          </p>
-        </div>
+        <PaymentTestModeBanner />
+
+        {hasSubscription && (
+          <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+            <div>
+              <p className="font-medium">Suscripción activa</p>
+              <p className="text-muted-foreground">
+                Estado: {subscription.data?.status}
+                {subscription.data?.current_period_end
+                  ? ` · Renovación: ${new Date(subscription.data.current_period_end).toLocaleDateString("es-ES")}`
+                  : ""}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              disabled={portalMutation.isPending}
+              onClick={() => portalMutation.mutate()}
+            >
+              Gestionar suscripción
+            </Button>
+          </div>
+        )}
 
         <div className="grid gap-4 lg:grid-cols-3">
           {ORDER.map((id) => {
@@ -84,23 +144,35 @@ function PlansPage() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  className="mt-5 w-full"
-                  variant={isCurrent ? "outline" : id === "free" ? "outline" : "default"}
-                  disabled={isCurrent || mutation.isPending}
-                  onClick={() => mutation.mutate(id)}
-                >
-                  {isCurrent
-                    ? "Plan actual"
-                    : id === "free"
-                      ? "Volver a gratis"
-                      : "Activar (simulado)"}
-                </Button>
+                {id === "free" ? (
+                  <Button
+                    className="mt-5 w-full"
+                    variant="outline"
+                    disabled={isCurrent || cancelMutation.isPending}
+                    onClick={() => cancelMutation.mutate()}
+                  >
+                    {isCurrent ? "Plan actual" : "Volver a gratis"}
+                  </Button>
+                ) : (
+                  <Button
+                    className="mt-5 w-full"
+                    variant={isCurrent ? "outline" : "default"}
+                    disabled={isCurrent || checkoutLoading}
+                    onClick={() => void buy(id)}
+                  >
+                    {isCurrent ? "Plan actual" : `Suscribirme por ${plan.price}`}
+                  </Button>
+                )}
               </article>
             );
           })}
         </div>
 
+        <p className="text-xs text-muted-foreground">
+          El pago se procesa de forma segura por nuestro proveedor, que actúa como vendedor
+          autorizado y emite la factura. Puedes cancelar cuando quieras desde «Gestionar
+          suscripción»; mantendrás el plan hasta el final del periodo pagado.
+        </p>
         <p className="text-xs text-muted-foreground">
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
           los planes, también cuando agotas la cuota de búsquedas.
