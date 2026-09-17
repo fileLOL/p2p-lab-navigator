@@ -59,10 +59,8 @@ function PlansPage() {
               <article key={id} className={`surface-card flex flex-col p-5 ${isCurrent ? "ring-2 ring-primary" : ""}`}>
                 <p className="font-display text-lg font-semibold">{plan.name}</p>
                 <p className="num mt-1 text-3xl font-semibold">
-                  {plan.price === 0 ? "0 €" : `${plan.price} €`}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {id === "monthly" ? " /mes" : id === "yearly" ? " /año" : ""}
-                  </span>
+                  {plan.price}
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">{plan.priceDetail}</span>
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {plan.dailySearches < 0 ? "Búsquedas ilimitadas" : `${plan.dailySearches} búsquedas al día`}
