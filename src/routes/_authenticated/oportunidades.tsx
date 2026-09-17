@@ -43,7 +43,9 @@ function OpportunitiesPage() {
 
   const [results, setResults] = useState<OpportunityDTO[] | null>(null);
   const [quota, setQuota] = useState<QuotaState | null>(null);
-  const [sourceStatus, setSourceStatus] = useState<{ name: string; status: string; message?: string }[]>([]);
+  const [sourceStatus, setSourceStatus] = useState<
+    { name: string; status: string; message?: string | undefined }[]
+  >([]);
   const [target, setTarget] = useState<SimulationTarget | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -274,7 +276,15 @@ function OpportunityCard({ opportunity, onSimulate }: { opportunity: Opportunity
   );
 }
 
-function Detail({ label, value, tone }: { label: string; value: string; tone?: "positive" | "negative" }) {
+function Detail({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "positive" | "negative" | undefined;
+}) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
