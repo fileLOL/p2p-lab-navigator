@@ -29,7 +29,7 @@ function TradesPage() {
   const fn = useServerFn(listTrades);
   const { data, isLoading } = useQuery({
     queryKey: ["trades", page],
-    queryFn: () => fn({ data: { limit: PAGE_SIZE, offset: page * PAGE_SIZE } }),
+    queryFn: () => fn({ data: { page, pageSize: PAGE_SIZE } }),
   });
 
   return (
@@ -76,10 +76,10 @@ function TradesPage() {
                     </td>
                     <td className="p-3 font-medium">{t.asset}</td>
                     <td className="num p-3">{formatQty(t.quantity)}</td>
-                    <td className="num p-3">{formatMoney(t.price, t.fiat, t.price < 10 ? 4 : 2)}</td>
-                    <td className="num p-3">{formatMoney(t.total, t.fiat)}</td>
+                    <td className="num p-3">{formatMoney(t.price, "EUR", t.price < 10 ? 4 : 2)}</td>
+                    <td className="num p-3">{formatMoney(t.total, "EUR")}</td>
                     <td className={`num p-3 ${t.realized_pnl > 0 ? "text-success" : t.realized_pnl < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                      {t.side === "sell" ? formatMoney(t.realized_pnl, t.fiat) : "—"}
+                      {t.side === "sell" ? formatMoney(t.realized_pnl, "EUR") : "—"}
                     </td>
                   </tr>
                 ))}

@@ -57,9 +57,9 @@ function WalletPage() {
           ) : (
             <div className="grid gap-3 lg:grid-cols-2">
               {data.positions.map((p) => {
-                const value = p.quantity * (p.reference_price ?? p.avg_cost);
+                const value = p.value;
                 const cost = p.quantity * p.avg_cost;
-                const pnl = value - cost;
+                const pnl = p.unrealized_pnl;
                 const pnlPct = cost > 0 ? (pnl / cost) * 100 : 0;
                 return (
                   <article key={p.asset} className="surface-card p-4">
@@ -74,7 +74,7 @@ function WalletPage() {
                       <Item label="Coste medio" value={formatMoney(p.avg_cost, "EUR", p.avg_cost < 10 ? 4 : 2)} />
                       <Item
                         label="Precio actual"
-                        value={p.reference_price ? formatMoney(p.reference_price, "EUR", p.reference_price < 10 ? 4 : 2) : "Sin referencia"}
+                        value={formatMoney(p.price, "EUR", p.price < 10 ? 4 : 2)}
                       />
                       <Item label="Valor" value={formatMoney(value)} />
                     </dl>
@@ -86,7 +86,7 @@ function WalletPage() {
                           asset: p.asset,
                           fiat: "EUR",
                           side: "sell",
-                          price: p.reference_price ?? p.avg_cost,
+                          price: p.price,
                           availableQuantity: p.quantity,
                         });
                         setOpen(true);
