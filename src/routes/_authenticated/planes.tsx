@@ -70,6 +70,11 @@ function PlansPage() {
     subscription.data && subscription.data.status !== "canceled",
   );
   const pendingCancel = Boolean(subscription.data?.cancel_at_period_end);
+  const isPastDue = subscription.data?.status === "past_due";
+  const pendingPriceId = subscription.data?.pending_price_id ?? null;
+  const pendingPlanName = (Object.keys(PRICE_IDS) as Exclude<PlanId, "free">[]).find(
+    (key) => PRICE_IDS[key] === pendingPriceId,
+  );
 
   const cancelMutation = useMutation({
     mutationFn: () => cancelFn({ data: { environment } }),
@@ -118,6 +123,26 @@ function PlansPage() {
     setCheckoutPriceId(PRICE_IDS[plan]);
   };
 
+  const [activating, setActivating] = useState(false);
+
+  /** Tras pagar, la confirmación tarda unos segundos: esperamos y avisamos. */
+  const waitForActivation = async () => {
+    setActivating(true);
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const result = await subscription.refetch();
+      if (result.data && result.data.status !== "canceled") {
+        invalidate();
+        toast.success("¡Suscripción activada! Ya tienes tu nueva cuota de búsquedas.");
+        setActivating(false);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    setActivating(false);
+    invalidate();
+    toast.info("Estamos confirmando tu pago. Se activará en unos minutos.");
+  };
+
   const autoStarted = useRef(false);
   useEffect(() => {
     if (autoStarted.current || !user) return;
@@ -130,11 +155,39 @@ function PlansPage() {
     buy(match);
   }, [user]);
 
-
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">
         <PaymentTestModeBanner />
+
+        {activating && (
+          <div className="surface-card border-primary/40 p-4 text-sm">
+            <p className="font-medium">Confirmando tu pago…</p>
+            <p className="text-muted-foreground">
+              Tu plan se activará en unos segundos. No cierres esta página.
+            </p>
+          </div>
+        )}
+
+        {isPastDue && (
+          <div className="surface-card border-destructive/50 p-4 text-sm">
+            <p className="font-medium text-destructive">No hemos podido cobrar tu renovación</p>
+            <p className="text-muted-foreground">
+              Mantienes tu plan mientras lo reintentamos. Actualiza tu método de pago desde
+              «Gestionar suscripción» para no perder el acceso.
+            </p>
+          </div>
+        )}
+
+        {pendingPlanName && (
+          <div className="surface-card p-4 text-sm">
+            <p className="font-medium">Cambio de plan programado</p>
+            <p className="text-muted-foreground">
+              Pasarás a {PLANS[pendingPlanName].name} en tu próxima renovación. Hasta entonces
+              mantienes las ventajas de tu plan actual.
+            </p>
+          </div>
+        )}
 
         {hasActiveSubscription && (
           <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
@@ -251,8 +304,7 @@ function PlansPage() {
           onOpenChange={(open) => {
             if (!open) {
               setCheckoutPriceId(null);
-              invalidate();
-              void subscription.refetch();
+              void waitForActivation();
             }
           }}
         />

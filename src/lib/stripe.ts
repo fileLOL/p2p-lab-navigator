@@ -29,3 +29,12 @@ export function getStripeEnvironment(): StripeEnv {
 export function isPaymentsConfigured(): boolean {
   return Boolean(clientToken);
 }
+
+/**
+ * Entorno usado para decidir el plan y la cuota del usuario.
+ * Nunca lanza: si no hay pagos configurados asume el entorno real,
+ * de modo que una compra de pruebas jamás da ventajas en el sitio publicado.
+ */
+export function entitlementEnvironment(): StripeEnv {
+  return clientToken?.startsWith("pk_test_") ? "sandbox" : "live";
+}
