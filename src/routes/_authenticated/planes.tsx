@@ -161,6 +161,35 @@ function PlansPage() {
       <div className="space-y-5">
         <PaymentTestModeBanner />
 
+        {activating && (
+          <div className="surface-card border-primary/40 p-4 text-sm">
+            <p className="font-medium">Confirmando tu pago…</p>
+            <p className="text-muted-foreground">
+              Tu plan se activará en unos segundos. No cierres esta página.
+            </p>
+          </div>
+        )}
+
+        {isPastDue && (
+          <div className="surface-card border-destructive/50 p-4 text-sm">
+            <p className="font-medium text-destructive">No hemos podido cobrar tu renovación</p>
+            <p className="text-muted-foreground">
+              Mantienes tu plan mientras lo reintentamos. Actualiza tu método de pago desde
+              «Gestionar suscripción» para no perder el acceso.
+            </p>
+          </div>
+        )}
+
+        {pendingPlanName && (
+          <div className="surface-card p-4 text-sm">
+            <p className="font-medium">Cambio de plan programado</p>
+            <p className="text-muted-foreground">
+              Pasarás a {PLANS[pendingPlanName].name} en tu próxima renovación. Hasta entonces
+              mantienes las ventajas de tu plan actual.
+            </p>
+          </div>
+        )}
+
         {hasActiveSubscription && (
           <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
             <div>
