@@ -70,6 +70,11 @@ function PlansPage() {
     subscription.data && subscription.data.status !== "canceled",
   );
   const pendingCancel = Boolean(subscription.data?.cancel_at_period_end);
+  const isPastDue = subscription.data?.status === "past_due";
+  const pendingPriceId = subscription.data?.pending_price_id ?? null;
+  const pendingPlanName = (Object.keys(PRICE_IDS) as Exclude<PlanId, "free">[]).find(
+    (key) => PRICE_IDS[key] === pendingPriceId,
+  );
 
   const cancelMutation = useMutation({
     mutationFn: () => cancelFn({ data: { environment } }),
