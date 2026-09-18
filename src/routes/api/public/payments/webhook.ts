@@ -79,13 +79,14 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv, even
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, eventAt?: string) {
   const { priceId, productId, periodStart, periodEnd } = readItem(subscription);
 
-  const { data: existing } = await getSupabase()
+  const { data: existing, error: existingError } = await getSupabase()
     .from("subscriptions")
     .select("price_id, current_period_start, last_event_at")
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env)
     .maybeSingle();
 
+  if (existingError) console.error("DBG select error", existingError);
   if (!existing) {
     // Llegó antes el "actualizado" que el "creado": registramos la suscripción entera.
     await handleSubscriptionCreated(subscription, env, eventAt);
