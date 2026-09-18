@@ -79,14 +79,13 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv, even
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, eventAt?: string) {
   const { priceId, productId, periodStart, periodEnd } = readItem(subscription);
 
-  const { data: existing, error: existingError } = await getSupabase()
+  const { data: existing } = await getSupabase()
     .from("subscriptions")
     .select("price_id, current_period_start, last_event_at")
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env)
     .maybeSingle();
 
-  if (existingError) console.error("DBG select error", existingError);
   if (!existing) {
     // Llegó antes el "actualizado" que el "creado": registramos la suscripción entera.
     await handleSubscriptionCreated(subscription, env, eventAt);
@@ -107,7 +106,6 @@ async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, even
   // Un cambio de plan programado no debe dar las ventajas del nuevo plan
   // hasta que se cobre: se guarda como pendiente hasta la renovación.
   const scheduledChange = Boolean(priceId) && samePeriod && priceId !== existing.price_id;
-  console.log("DBG update", { samePeriod, scheduledChange, priceId, existing });
 
   await getSupabase()
     .from("subscriptions")
