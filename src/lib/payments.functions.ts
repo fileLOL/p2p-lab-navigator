@@ -10,7 +10,7 @@ const envSchema = z.enum(["sandbox", "live"]);
 const ALLOWED_PRICE_IDS = new Set(["p2plab_premium_monthly", "p2plab_premium_yearly"]);
 
 const SUBSCRIPTION_COLUMNS =
-  "stripe_subscription_id, status, current_period_end, cancel_at_period_end";
+  "stripe_subscription_id, status, price_id, pending_price_id, current_period_end, cancel_at_period_end";
 
 async function loadStripe(environment: StripeEnv) {
   const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
@@ -104,6 +104,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 export interface SubscriptionDTO {
   status: string;
   price_id: string;
+  pending_price_id: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   environment: string;
@@ -115,7 +116,7 @@ export const getSubscription = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("subscriptions")
-      .select("status, price_id, current_period_end, cancel_at_period_end, environment")
+      .select("status, price_id, pending_price_id, current_period_end, cancel_at_period_end, environment")
       .eq("user_id", context.userId)
       .eq("environment", data.environment)
       .order("created_at", { ascending: false })
@@ -184,6 +185,12 @@ export const changeSubscriptionPlan = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!row || row.status === "canceled") {
       throw new Error("No tienes ninguna suscripción activa que cambiar.");
+    }
+    if (row.cancel_at_period_end) {
+      throw new Error("Tu suscripción está cancelada; no se puede cambiar de plan.");
+    }
+    if ((row.pending_price_id ?? row.price_id) === data.priceId) {
+      throw new Error("Ya tienes ese plan programado.");
     }
 
     const { stripe, getStripeErrorMessage } = await loadStripe(data.environment);
