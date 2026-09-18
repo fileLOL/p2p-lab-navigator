@@ -221,7 +221,9 @@ export const searchOpportunities = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data: quotaRaw, error: quotaError } = await supabase.rpc("consume_search", { _env: entitlementEnvironment() });
+    const { data: quotaRaw, error: quotaError } = await supabase.rpc("consume_search", {
+      _env: entitlementEnvironment(),
+    });
     if (quotaError) throw new Error(quotaError.message);
     const quotaResult = quotaRaw as unknown as QuotaState & { allowed: boolean };
     if (!quotaResult.allowed) {
@@ -435,7 +437,10 @@ export const changePlan = createServerFn({ method: "POST" })
     z.object({ plan: z.enum(["free", "monthly", "yearly"]) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: quota, error } = await context.supabase.rpc("change_plan", { _plan: data.plan, _env: entitlementEnvironment() });
+    const { data: quota, error } = await context.supabase.rpc("change_plan", {
+      _plan: data.plan,
+      _env: entitlementEnvironment(),
+    });
     if (error) {
       if (error.message.includes("plan_requires_payment")) {
         throw new Error("Los planes de pago se activan al completar el pago.");

@@ -155,7 +155,6 @@ function PlansPage() {
     buy(match);
   }, [user]);
 
-
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">

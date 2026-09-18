@@ -135,7 +135,6 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv, even
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Respaldo: si customer.subscription.created se perdió, el evento de sesión
@@ -156,6 +155,8 @@ async function handleInvoicePaymentFailed(invoice: any, env: StripeEnv, eventAt:
   const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
   await handleSubscriptionUpdated(subscription, env, eventAt);
 }
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
