@@ -305,8 +305,7 @@ function PlansPage() {
           onOpenChange={(open) => {
             if (!open) {
               setCheckoutPriceId(null);
-              invalidate();
-              void subscription.refetch();
+              void waitForActivation();
             }
           }}
         />
