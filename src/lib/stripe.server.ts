@@ -54,6 +54,8 @@ export function getStripeErrorMessage(error: unknown): string {
 }
 
 interface StripeWebhookEvent {
+  id: string;
+  created?: number;
   type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: { object: any };
