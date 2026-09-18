@@ -68,34 +68,70 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv, even
         current_period_end: isoFromUnix(periodEnd),
         cancel_at_period_end: subscription.cancel_at_period_end ?? false,
         environment: env,
+        pending_price_id: null,
+        last_event_at: eventAt ?? new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
       { onConflict: "stripe_subscription_id" },
     );
 }
 
-async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
+async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, eventAt?: string) {
   const { priceId, productId, periodStart, periodEnd } = readItem(subscription);
+
+  const { data: existing } = await getSupabase()
+    .from("subscriptions")
+    .select("price_id, current_period_start, last_event_at")
+    .eq("stripe_subscription_id", subscription.id)
+    .eq("environment", env)
+    .maybeSingle();
+
+  if (!existing) {
+    // Llegó antes el "actualizado" que el "creado": registramos la suscripción entera.
+    await handleSubscriptionCreated(subscription, env, eventAt);
+    return;
+  }
+
+  // Descartar avisos más antiguos que el último ya aplicado.
+  if (eventAt && existing.last_event_at && new Date(eventAt) < new Date(existing.last_event_at)) {
+    return;
+  }
+
+  const newStart = isoFromUnix(periodStart);
+  const samePeriod =
+    Boolean(existing.current_period_start) && existing.current_period_start === newStart;
+  // Un cambio de plan programado no debe dar las ventajas del nuevo plan
+  // hasta que se cobre: se guarda como pendiente hasta la renovación.
+  const scheduledChange = Boolean(priceId) && samePeriod && priceId !== existing.price_id;
 
   await getSupabase()
     .from("subscriptions")
     .update({
       status: subscription.status,
-      current_period_start: isoFromUnix(periodStart),
+      current_period_start: newStart,
       current_period_end: isoFromUnix(periodEnd),
       cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-      ...(priceId ? { price_id: priceId } : {}),
-      ...(productId ? { product_id: productId } : {}),
+      ...(scheduledChange
+        ? { pending_price_id: priceId }
+        : priceId
+          ? { price_id: priceId, pending_price_id: null }
+          : {}),
+      ...(productId && !scheduledChange ? { product_id: productId } : {}),
+      last_event_at: eventAt ?? new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
 }
 
-async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
+async function handleSubscriptionDeleted(subscription: any, env: StripeEnv, eventAt?: string) {
   await getSupabase()
     .from("subscriptions")
-    .update({ status: "canceled", updated_at: new Date().toISOString() })
+    .update({
+      status: "canceled",
+      last_event_at: eventAt ?? new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
 }
