@@ -479,6 +479,28 @@ export const deleteAccount = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ confirmation: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
     if (data.confirmation !== "ELIMINAR") throw new Error("Confirmación incorrecta.");
+
+    // Cancelar de inmediato cualquier suscripción para que no se siga cobrando.
+    const { data: subs } = await context.supabase
+      .from("subscriptions")
+      .select("stripe_subscription_id, environment, status")
+      .eq("user_id", context.userId);
+    if (subs?.length) {
+      const { createStripeClient } = await import("@/lib/stripe.server");
+      for (const sub of subs) {
+        if (sub.status === "canceled") continue;
+        try {
+          const stripe = createStripeClient(sub.environment as "sandbox" | "live");
+          await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+        } catch (cancelError) {
+          console.error("No se pudo cancelar la suscripción al borrar la cuenta", cancelError);
+          throw new Error(
+            "No hemos podido cancelar tu suscripción. Inténtalo de nuevo en unos minutos o contacta con soporte.",
+          );
+        }
+      }
+    }
+
     const { error } = await context.supabase.rpc("delete_my_account");
     if (error) throw new Error(error.message);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
