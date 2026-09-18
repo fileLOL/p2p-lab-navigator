@@ -31,7 +31,18 @@ function readItem(subscription: any) {
   };
 }
 
-async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
+/** Devuelve true si el evento ya se procesó antes (reintento del proveedor). */
+async function alreadyProcessed(eventId: string, eventType: string): Promise<boolean> {
+  const { error } = await getSupabase()
+    .from("payment_events")
+    .insert({ event_id: eventId, event_type: eventType });
+  if (!error) return false;
+  if (error.code === "23505") return true;
+  console.error("No se pudo registrar el evento de pago:", error.message);
+  return false;
+}
+
+async function handleSubscriptionCreated(subscription: any, env: StripeEnv, eventAt?: string) {
   const userId = subscription.metadata?.userId;
   if (!userId) {
     console.error("Webhook: falta userId en metadata de la suscripción");
