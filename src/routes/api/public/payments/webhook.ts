@@ -99,7 +99,10 @@ async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, even
 
   const newStart = isoFromUnix(periodStart);
   const samePeriod =
-    Boolean(existing.current_period_start) && existing.current_period_start === newStart;
+    Boolean(existing.current_period_start) &&
+    Boolean(newStart) &&
+    new Date(existing.current_period_start as string).getTime() ===
+      new Date(newStart as string).getTime();
   // Un cambio de plan programado no debe dar las ventajas del nuevo plan
   // hasta que se cobre: se guarda como pendiente hasta la renovación.
   const scheduledChange = Boolean(priceId) && samePeriod && priceId !== existing.price_id;
