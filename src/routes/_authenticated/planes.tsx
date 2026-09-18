@@ -123,6 +123,26 @@ function PlansPage() {
     setCheckoutPriceId(PRICE_IDS[plan]);
   };
 
+  const [activating, setActivating] = useState(false);
+
+  /** Tras pagar, la confirmación tarda unos segundos: esperamos y avisamos. */
+  const waitForActivation = async () => {
+    setActivating(true);
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const result = await subscription.refetch();
+      if (result.data && result.data.status !== "canceled") {
+        invalidate();
+        toast.success("¡Suscripción activada! Ya tienes tu nueva cuota de búsquedas.");
+        setActivating(false);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    setActivating(false);
+    invalidate();
+    toast.info("Estamos confirmando tu pago. Se activará en unos minutos.");
+  };
+
   const autoStarted = useRef(false);
   useEffect(() => {
     if (autoStarted.current || !user) return;
