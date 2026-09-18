@@ -34,7 +34,6 @@ const NAV = [
 ] as const;
 
 const MOBILE_NAV = NAV.slice(0, 4);
-const MOBILE_MORE = NAV.slice(4);
 
 export function AppShell({
   title,
