@@ -14,7 +14,23 @@ export function getConnectionApiKey(env: StripeEnv): string {
   return env === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
 }
 
+/** Clave propia de la cuenta real, cuando el titular la aporta directamente. */
+function getDirectLiveKey(): string | undefined {
+  const key = process.env["STRIPE_RESTRICTED_API_KEY"];
+  return key && (key.startsWith("rk_live_") || key.startsWith("sk_live_")) ? key : undefined;
+}
+
+/** Los cobros reales con clave propia no pasan por el vendedor gestionado. */
+export function usesManagedPayments(env: StripeEnv): boolean {
+  return !(env === "live" && getDirectLiveKey());
+}
+
 export function createStripeClient(env: StripeEnv): Stripe {
+  const directLiveKey = env === "live" ? getDirectLiveKey() : undefined;
+  if (directLiveKey) {
+    return new Stripe(directLiveKey, { apiVersion: "2026-03-25.dahlia" });
+  }
+
   const connectionApiKey = getConnectionApiKey(env);
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
 

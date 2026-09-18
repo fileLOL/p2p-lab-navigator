@@ -11,5 +11,6 @@
 - [x] Aviso de pago fallido (`past_due`) manteniendo el acceso
 - [x] Evitar avisos duplicados o desordenados del proveedor (`payment_events`, `last_event_at`)
 - [x] Confirmación visible tras pagar ("Confirmando tu pago…")
-- [ ] Pendiente usuario: completar la verificación de la cuenta de cobros para crear las claves reales
+- [x] Usar la clave real aportada por el titular para los cobros en el sitio publicado
+- [ ] Pendiente usuario: Stripe debe activar los métodos de pago de la cuenta real (verificación en curso)
 - [ ] Pendiente usuario: dominio de correo para el email de bienvenida
