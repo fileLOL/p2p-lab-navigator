@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { MAX_RESULTS_PER_SEARCH } from "@/lib/config";
+import { entitlementEnvironment } from "@/lib/stripe";
 
 // ---------- Tipos compartidos con la UI ----------
 
@@ -84,7 +85,7 @@ export const getOverview = createServerFn({ method: "GET" })
     const [{ data: metricsRaw, error: metricsError }, { data: quotaRaw }, { data: profile }] =
       await Promise.all([
         supabase.rpc("refresh_equity"),
-        supabase.rpc("get_quota"),
+        supabase.rpc("get_quota", { _env: entitlementEnvironment() }),
         supabase
           .from("profiles")
           .select("id, email, display_name, plan, plan_started_at")
@@ -220,7 +221,7 @@ export const searchOpportunities = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data: quotaRaw, error: quotaError } = await supabase.rpc("consume_search");
+    const { data: quotaRaw, error: quotaError } = await supabase.rpc("consume_search", { _env: entitlementEnvironment() });
     if (quotaError) throw new Error(quotaError.message);
     const quotaResult = quotaRaw as unknown as QuotaState & { allowed: boolean };
     if (!quotaResult.allowed) {
@@ -434,7 +435,7 @@ export const changePlan = createServerFn({ method: "POST" })
     z.object({ plan: z.enum(["free", "monthly", "yearly"]) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: quota, error } = await context.supabase.rpc("change_plan", { _plan: data.plan });
+    const { data: quota, error } = await context.supabase.rpc("change_plan", { _plan: data.plan, _env: entitlementEnvironment() });
     if (error) {
       if (error.message.includes("plan_requires_payment")) {
         throw new Error("Los planes de pago se activan al completar el pago.");
