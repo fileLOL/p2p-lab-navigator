@@ -141,28 +141,48 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv, even
  * Respaldo: si customer.subscription.created se perdió, el evento de sesión
  * completada recupera la suscripción desde Stripe y la registra igualmente.
  */
-async function handleCheckoutSessionCompleted(session: any, env: StripeEnv) {
+async function handleCheckoutSessionCompleted(session: any, env: StripeEnv, eventAt: string) {
   if (session.mode !== "subscription" || !session.subscription) return;
   const stripe = createStripeClient(env);
   const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-  await handleSubscriptionCreated(subscription, env);
+  await handleSubscriptionCreated(subscription, env, eventAt);
+}
+
+/** El cobro de una renovación falló: Stripe reintenta y el estado pasa a past_due. */
+async function handleInvoicePaymentFailed(invoice: any, env: StripeEnv, eventAt: string) {
+  const subscriptionId = invoice.subscription ?? invoice.parent?.subscription_details?.subscription;
+  if (!subscriptionId) return;
+  const stripe = createStripeClient(env);
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
+  await handleSubscriptionUpdated(subscription, env, eventAt);
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
+  const eventAt = new Date((event.created ?? Math.floor(Date.now() / 1000)) * 1000).toISOString();
+
+  if (await alreadyProcessed(event.id, event.type)) {
+    console.log("Evento ya procesado, se ignora:", event.id);
+    return;
+  }
 
   switch (event.type) {
     case "checkout.session.completed":
-      await handleCheckoutSessionCompleted(event.data.object, env);
+    case "checkout.session.async_payment_succeeded":
+      await handleCheckoutSessionCompleted(event.data.object, env, eventAt);
       break;
     case "customer.subscription.created":
-      await handleSubscriptionCreated(event.data.object, env);
+      await handleSubscriptionCreated(event.data.object, env, eventAt);
       break;
     case "customer.subscription.updated":
-      await handleSubscriptionUpdated(event.data.object, env);
+      await handleSubscriptionUpdated(event.data.object, env, eventAt);
       break;
     case "customer.subscription.deleted":
-      await handleSubscriptionDeleted(event.data.object, env);
+      await handleSubscriptionDeleted(event.data.object, env, eventAt);
+      break;
+    case "invoice.paid":
+    case "invoice.payment_failed":
+      await handleInvoicePaymentFailed(event.data.object, env, eventAt);
       break;
     default:
       console.log("Evento no gestionado:", event.type);
