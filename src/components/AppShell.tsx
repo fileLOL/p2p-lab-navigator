@@ -4,15 +4,23 @@ import {
   CreditCard,
   LayoutDashboard,
   LineChart,
+  Menu,
   Search,
   Shield,
   Wallet,
   LogOut,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const NAV = [
