@@ -78,7 +78,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     if (!ALLOWED_PRICE_IDS.has(data.priceId)) return { error: "Plan no válido." };
-    const { stripe, getStripeErrorMessage } = await loadStripe(data.environment);
+    const { stripe, getStripeErrorMessage, managed } = await loadStripe(data.environment);
     try {
       const {
         data: { user },
@@ -96,9 +96,12 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
-        metadata: { userId: context.userId, managed_payments: "true" },
+        metadata: {
+          userId: context.userId,
+          ...(managed ? { managed_payments: "true" } : {}),
+        },
         subscription_data: { metadata: { userId: context.userId } },
-        managed_payments: { enabled: true },
+        ...(managed ? { managed_payments: { enabled: true } } : {}),
       } as Stripe.Checkout.SessionCreateParams);
 
       return { clientSecret: session.client_secret ?? "" };
