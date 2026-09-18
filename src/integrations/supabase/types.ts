@@ -319,6 +319,24 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          received_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          received_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          received_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -327,6 +345,7 @@ export type Database = {
           id: string
           plan: string
           plan_started_at: string | null
+          sandbox_plan: string
           updated_at: string
         }
         Insert: {
@@ -336,6 +355,7 @@ export type Database = {
           id: string
           plan?: string
           plan_started_at?: string | null
+          sandbox_plan?: string
           updated_at?: string
         }
         Update: {
@@ -345,6 +365,7 @@ export type Database = {
           id?: string
           plan?: string
           plan_started_at?: string | null
+          sandbox_plan?: string
           updated_at?: string
         }
         Relationships: []
@@ -381,6 +402,8 @@ export type Database = {
           current_period_start: string | null
           environment: string
           id: string
+          last_event_at: string | null
+          pending_price_id: string | null
           price_id: string
           product_id: string
           status: string
@@ -396,6 +419,8 @@ export type Database = {
           current_period_start?: string | null
           environment?: string
           id?: string
+          last_event_at?: string | null
+          pending_price_id?: string | null
           price_id: string
           product_id: string
           status?: string
@@ -411,6 +436,8 @@ export type Database = {
           current_period_start?: string | null
           environment?: string
           id?: string
+          last_event_at?: string | null
+          pending_price_id?: string | null
           price_id?: string
           product_id?: string
           status?: string
@@ -426,12 +453,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      change_plan: { Args: { _plan: string }; Returns: Json }
-      consume_search: { Args: never; Returns: Json }
+      change_plan:
+        | { Args: { _plan: string }; Returns: Json }
+        | { Args: { _env: string; _plan: string }; Returns: Json }
+      consume_search:
+        | { Args: never; Returns: Json }
+        | { Args: { _env: string }; Returns: Json }
       current_email_hash: { Args: never; Returns: string }
       delete_my_account: { Args: never; Returns: undefined }
       email_usage_hash: { Args: { _email: string }; Returns: string }
-      get_quota: { Args: never; Returns: Json }
+      get_quota:
+        | { Args: never; Returns: Json }
+        | { Args: { _env: string }; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -461,6 +494,7 @@ export type Database = {
         Returns: Json
       }
       plan_daily_limit: { Args: { _plan: string }; Returns: number }
+      plan_for_env: { Args: { _env: string; _uid: string }; Returns: string }
       refresh_equity: { Args: never; Returns: Json }
     }
     Enums: {
