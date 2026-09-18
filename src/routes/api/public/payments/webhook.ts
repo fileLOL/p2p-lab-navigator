@@ -106,6 +106,7 @@ async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, even
   // Un cambio de plan programado no debe dar las ventajas del nuevo plan
   // hasta que se cobre: se guarda como pendiente hasta la renovación.
   const scheduledChange = Boolean(priceId) && samePeriod && priceId !== existing.price_id;
+  console.log("DBG update", { samePeriod, scheduledChange, priceId, existing });
 
   await getSupabase()
     .from("subscriptions")
