@@ -3,16 +3,16 @@ import { describe, expect, it } from "vitest";
 import { computePortfolio, computeTradeStats, quoteBuy, quoteSell } from "./accounting";
 
 describe("computePortfolio", () => {
-  it("empieza con 20 € de capital y ROI 0", () => {
+  it("empieza con 25.000 € de capital y ROI 0", () => {
     const result = computePortfolio({
-      initialCapital: 20,
-      cash: 20,
+      initialCapital: 25000,
+      cash: 25000,
       positions: [],
       prices: {},
       realizedPnl: 0,
-      peakEquity: 20,
+      peakEquity: 25000,
     });
-    expect(result.equity).toBe(20);
+    expect(result.equity).toBe(25000);
     expect(result.investedCost).toBe(0);
     expect(result.roiPct).toBe(0);
     expect(result.maxDrawdown).toBe(0);

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Compara ofertas P2P de criptomonedas de varias plataformas y practica con 20 € de capital virtual. Sin custodia de fondos y sin riesgo.",
+          "Compara ofertas P2P de criptomonedas de varias plataformas y practica con 25.000 € de capital virtual. Sin custodia de fondos y sin riesgo.",
       },
       {
         property: "og:title",
@@ -91,7 +91,7 @@ function Landing() {
             <Step
               icon={<Wallet className="size-5 text-primary" />}
               title="2. Simula la operación"
-              text="Compra o vende con tu capital virtual de 20 €. Tu efectivo, tus posiciones y tu patrimonio se actualizan al instante."
+              text="Compra o vende con tu capital virtual de 25.000 €. Tu efectivo, tus posiciones y tu patrimonio se actualizan al instante."
             />
             <Step
               icon={<BarChart3 className="size-5 text-primary" />}
