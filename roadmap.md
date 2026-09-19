@@ -14,3 +14,4 @@
 - [x] Usar la clave real aportada por el titular para los cobros en el sitio publicado
 - [ ] Pendiente usuario: Stripe debe activar los métodos de pago de la cuenta real (verificación en curso)
 - [ ] Pendiente usuario: dominio de correo para el email de bienvenida
+- [x] Sección "Trading real" con Binance Spot: conexión con claves API cifradas (AES-256-GCM), saldos reales, órdenes a mercado con doble confirmación, historial, desconexión. Términos actualizados (sin custodia).

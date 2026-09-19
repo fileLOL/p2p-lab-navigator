@@ -48,7 +48,7 @@ function TerminosPage() {
       <main className="mx-auto max-w-3xl px-4 py-10">
         <h1 className="font-display text-3xl font-bold">Términos y Condiciones</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Última actualización: 17 de septiembre de 2026
+          Última actualización: 20 de septiembre de 2026
         </p>
         <Card className="mt-6">
           <CardContent className="space-y-6 p-6">
@@ -68,15 +68,34 @@ function TerminosPage() {
 
             <Section title="2. Descripción del servicio">
               <p>
-                P2P Lab es una herramienta educativa de análisis de diferenciales de precios en
-                mercados P2P de criptomonedas y de simulación de operaciones (paper trading) con
-                capital virtual. No es un exchange, no custodia fondos, no ejecuta operaciones
-                reales y no ofrece asesoramiento financiero, de inversión, legal ni fiscal.
+                P2P Lab es una herramienta de análisis de diferenciales de precios en mercados P2P
+                de criptomonedas, de simulación de operaciones (paper trading) con capital
+                virtual, y un terminal desde el que puedes lanzar operaciones sobre tu propia
+                cuenta de un exchange (actualmente Binance) conectándola con tus claves API. No es
+                un exchange, no custodia fondos, no ejecuta operaciones por cuenta propia ni en tu
+                nombre de forma discrecional, y no ofrece asesoramiento financiero, de inversión,
+                legal ni fiscal.
               </p>
               <p>
                 Los datos de mercado proceden de fuentes públicas (etiquetadas como REALES) o de
                 demostración (etiquetadas como DEMO). Los diferenciales mostrados no representan
                 beneficio garantizado ni real.
+              </p>
+            </Section>
+
+            <Section title="2 bis. Trading real con tu cuenta de exchange">
+              <p>
+                Si conectas tu cuenta de un exchange mediante claves API, las operaciones se
+                ejecutan siempre en tu propia cuenta, con tus fondos y bajo tu exclusiva
+                responsabilidad. P2P Lab actúa únicamente como software que transmite las órdenes
+                que tú confirmas expresamente; nunca custodia tus fondos ni puede retirarlos (las
+                claves deben crearse sin permiso de retirada).
+              </p>
+              <p>
+                Tus claves se almacenan cifradas y solo se usan para ejecutar lo que tú confirmas.
+                Puedes desconectar el exchange en cualquier momento, lo que elimina las claves de
+                nuestros sistemas. Las pérdidas derivadas de tus operaciones, de errores de
+                configuración de tus claves o de fallos del exchange son responsabilidad tuya.
               </p>
             </Section>
 

@@ -101,6 +101,33 @@ export type Database = {
         }
         Relationships: []
       }
+      exchange_keys: {
+        Row: {
+          api_key: string
+          api_secret_encrypted: string
+          created_at: string
+          exchange: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          api_secret_encrypted: string
+          created_at?: string
+          exchange?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          api_secret_encrypted?: string
+          created_at?: string
+          exchange?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           amount_max: number | null
@@ -367,6 +394,51 @@ export type Database = {
           plan_started_at?: string | null
           sandbox_plan?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      real_orders: {
+        Row: {
+          created_at: string
+          error: string | null
+          exchange: string
+          id: string
+          order_id: string | null
+          price: number | null
+          quantity: number
+          quote_quantity: number | null
+          side: string
+          status: string
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          exchange?: string
+          id?: string
+          order_id?: string | null
+          price?: number | null
+          quantity: number
+          quote_quantity?: number | null
+          side: string
+          status?: string
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          exchange?: string
+          id?: string
+          order_id?: string | null
+          price?: number | null
+          quantity?: number
+          quote_quantity?: number | null
+          side?: string
+          status?: string
+          symbol?: string
+          user_id?: string
         }
         Relationships: []
       }
