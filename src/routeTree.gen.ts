@@ -24,6 +24,7 @@ import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedOportunidadesRouteImport } from './routes/_authenticated/oportunidades'
 import { Route as AuthenticatedPlanesRouteImport } from './routes/_authenticated/planes'
 import { Route as AuthenticatedSeguridadRouteImport } from './routes/_authenticated/seguridad'
+import { Route as AuthenticatedTradingRealRouteImport } from './routes/_authenticated/trading-real'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -103,6 +104,12 @@ const AuthenticatedSeguridadRoute = AuthenticatedSeguridadRouteImport.update({
   path: '/seguridad',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTradingRealRoute =
+  AuthenticatedTradingRealRouteImport.update({
+    id: '/trading-real',
+    path: '/trading-real',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -125,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/oportunidades': typeof AuthenticatedOportunidadesRoute
   '/planes': typeof AuthenticatedPlanesRoute
   '/seguridad': typeof AuthenticatedSeguridadRoute
+  '/trading-real': typeof AuthenticatedTradingRealRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
   '/oportunidades': typeof AuthenticatedOportunidadesRoute
   '/planes': typeof AuthenticatedPlanesRoute
   '/seguridad': typeof AuthenticatedSeguridadRoute
+  '/trading-real': typeof AuthenticatedTradingRealRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -161,6 +170,7 @@ export interface FileRoutesById {
   '/_authenticated/oportunidades': typeof AuthenticatedOportunidadesRoute
   '/_authenticated/planes': typeof AuthenticatedPlanesRoute
   '/_authenticated/seguridad': typeof AuthenticatedSeguridadRoute
+  '/_authenticated/trading-real': typeof AuthenticatedTradingRealRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/oportunidades'
     | '/planes'
     | '/seguridad'
+    | '/trading-real'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/oportunidades'
     | '/planes'
     | '/seguridad'
+    | '/trading-real'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -215,6 +227,7 @@ export interface FileRouteTypes {
     | '/_authenticated/oportunidades'
     | '/_authenticated/planes'
     | '/_authenticated/seguridad'
+    | '/_authenticated/trading-real'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeguridadRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/trading-real': {
+      id: '/_authenticated/trading-real'
+      path: '/trading-real'
+      fullPath: '/trading-real'
+      preLoaderRoute: typeof AuthenticatedTradingRealRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -355,6 +375,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOportunidadesRoute: typeof AuthenticatedOportunidadesRoute
   AuthenticatedPlanesRoute: typeof AuthenticatedPlanesRoute
   AuthenticatedSeguridadRoute: typeof AuthenticatedSeguridadRoute
+  AuthenticatedTradingRealRoute: typeof AuthenticatedTradingRealRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -365,6 +386,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOportunidadesRoute: AuthenticatedOportunidadesRoute,
   AuthenticatedPlanesRoute: AuthenticatedPlanesRoute,
   AuthenticatedSeguridadRoute: AuthenticatedSeguridadRoute,
+  AuthenticatedTradingRealRoute: AuthenticatedTradingRealRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
