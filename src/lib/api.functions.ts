@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { MAX_RESULTS_PER_SEARCH } from "@/lib/config";
-import { entitlementEnvironment } from "@/lib/payments";
+import { entitlementEnvironment } from "@/lib/stripe";
 
 // ---------- Tipos compartidos con la UI ----------
 
