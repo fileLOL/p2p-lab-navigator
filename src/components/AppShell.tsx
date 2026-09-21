@@ -1,6 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   BarChart3,
+  BookOpen,
   CreditCard,
   LayoutDashboard,
   LineChart,
@@ -25,6 +26,7 @@ const NAV = [
   { to: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
   { to: "/planes", label: "Planes", icon: CreditCard },
   { to: "/seguridad", label: "Seguridad", icon: Shield },
+  { to: "/guia", label: "Guía", icon: BookOpen },
 ] as const;
 
 const MOBILE_NAV = NAV.slice(0, 4);
