@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { PayPalSubscription } from "@/lib/paypal.server";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -46,7 +47,7 @@ export const createSubscription = createServerFn({ method: "POST" })
       } = await context.supabase.auth.getUser();
 
       const planId = await paypal.ensurePlan(data.environment, data.priceId);
-      const subscription = await paypal.paypalFetch<paypal.PayPalSubscription>(
+      const subscription = await paypal.paypalFetch<PayPalSubscription>(
         data.environment,
         "/v1/billing/subscriptions",
         {
