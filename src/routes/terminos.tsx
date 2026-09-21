@@ -138,9 +138,9 @@ function TerminosPage() {
 
             <Section title="7. Pagos y suscripciones">
               <p>
-                Los pagos se procesan de forma segura a través de nuestro proveedor de pagos,
-                nuestro proveedor de pagos,, que gestiona el cobro, la facturación, los impuestos y
-                las devoluciones; no almacenamos los datos de tu tarjeta.
+                Los pagos se procesan de forma segura a través de nuestro proveedor de pagos, que
+                gestiona el cobro, la facturación, los impuestos y las devoluciones; no almacenamos
+                los datos de tu tarjeta.
               </p>
               <p>
                 Las suscripciones se renuevan automáticamente (mensual o anual según el plan) y

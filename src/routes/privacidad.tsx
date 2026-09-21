@@ -87,9 +87,8 @@ function PrivacidadPage() {
                 </li>
               </ul>
               <p>
-                Los datos de pago los recoge y trata directamente nuestro proveedor de pagos,
-                nuestro proveedor de pagos,, que gestiona el cobro y la facturación; no almacenamos
-                los datos de tu tarjeta.
+                Los datos de pago los recoge y trata directamente nuestro proveedor de pagos, que
+                gestiona el cobro y la facturación; no almacenamos los datos de tu tarjeta.
               </p>
             </Section>
 
