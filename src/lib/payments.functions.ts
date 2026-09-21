@@ -13,9 +13,8 @@ const SUBSCRIPTION_COLUMNS =
   "provider_subscription_id, status, price_id, pending_price_id, current_period_end, cancel_at_period_end";
 
 async function loadStripe(environment: StripeEnv) {
-  const { createStripeClient, getStripeErrorMessage, usesManagedPayments } = await import(
-    "@/lib/stripe.server"
-  );
+  const { createStripeClient, getStripeErrorMessage, usesManagedPayments } =
+    await import("@/lib/stripe.server");
   return {
     stripe: createStripeClient(environment),
     getStripeErrorMessage,

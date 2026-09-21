@@ -43,31 +43,35 @@ async function upsertSubscription(subscription: any, env: StripeEnv, eventAt: st
   const item = subscription.items?.data?.[0];
   const priceId = readPriceId(item);
   const productId =
-    typeof item?.price?.product === "string" ? item.price.product : (item?.price?.product?.id ?? "");
+    typeof item?.price?.product === "string"
+      ? item.price.product
+      : (item?.price?.product?.id ?? "");
   const periodStart = isoFromUnix(item?.current_period_start ?? subscription.current_period_start);
   const periodEnd = isoFromUnix(item?.current_period_end ?? subscription.current_period_end);
 
-  await getSupabase().from("subscriptions").upsert(
-    {
-      user_id: userId,
-      provider: "stripe",
-      provider_subscription_id: subscription.id,
-      provider_customer_id:
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : (subscription.customer?.id ?? ""),
-      product_id: productId,
-      price_id: priceId ?? "",
-      status: subscription.status,
-      current_period_start: periodStart,
-      current_period_end: periodEnd,
-      cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-      environment: env,
-      last_event_at: eventAt,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "provider_subscription_id" },
-  );
+  await getSupabase()
+    .from("subscriptions")
+    .upsert(
+      {
+        user_id: userId,
+        provider: "stripe",
+        provider_subscription_id: subscription.id,
+        provider_customer_id:
+          typeof subscription.customer === "string"
+            ? subscription.customer
+            : (subscription.customer?.id ?? ""),
+        product_id: productId,
+        price_id: priceId ?? "",
+        status: subscription.status,
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
+        cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+        environment: env,
+        last_event_at: eventAt,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "provider_subscription_id" },
+    );
 }
 
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv, eventAt: string) {
@@ -152,7 +156,9 @@ async function handleWebhook(req: Request, env: StripeEnv) {
   const event = await verifyWebhook(req, env);
   if (event.id && (await alreadyProcessed(event.id, event.type))) return;
 
-  const eventAt = event.created ? new Date(event.created * 1000).toISOString() : new Date().toISOString();
+  const eventAt = event.created
+    ? new Date(event.created * 1000).toISOString()
+    : new Date().toISOString();
 
   switch (event.type) {
     case "customer.subscription.created":
