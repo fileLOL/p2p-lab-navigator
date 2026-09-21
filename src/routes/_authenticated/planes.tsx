@@ -7,19 +7,18 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { StripeCheckoutDialog } from "@/components/StripeCheckoutDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateOverview, useOverview } from "@/hooks/useOverview";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
-import { getPaymentsEnvironment } from "@/lib/payments";
+import { getStripeEnvironment } from "@/lib/stripe";
 import {
   cancelSubscription,
   changeSubscriptionPlan,
-  createSubscription,
   getBillingPortalUrl,
   getSubscription,
-  syncSubscriptionState,
 } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/planes")({
@@ -50,17 +49,18 @@ function PlansPage() {
   const { data } = useOverview();
   const { user } = useAuth();
   const invalidate = useInvalidateOverview();
-  const environment = getPaymentsEnvironment();
+  const environment = getStripeEnvironment();
 
   const downgrade = useServerFn(changePlan);
   const cancelFn = useServerFn(cancelSubscription);
   const switchFn = useServerFn(changeSubscriptionPlan);
   const subscriptionFn = useServerFn(getSubscription);
   const portalFn = useServerFn(getBillingPortalUrl);
-  const createFn = useServerFn(createSubscription);
-  const syncFn = useServerFn(syncSubscriptionState);
 
   const current = (data?.profile?.plan ?? "free") as PlanId;
+
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+  const [activating, setActivating] = useState(false);
 
   const subscription = useQuery({
     queryKey: ["subscription", environment],
@@ -106,20 +106,8 @@ function PlansPage() {
   });
 
   const switchMutation = useMutation({
-    mutationFn: (priceId: string) =>
-      switchFn({
-        data: {
-          environment,
-          priceId,
-          returnUrl: `${window.location.origin}/planes?pago=ok`,
-          cancelUrl: `${window.location.origin}/planes?pago=cancelado`,
-        },
-      }),
-    onSuccess: (result) => {
-      if (result.approveUrl) {
-        window.location.href = result.approveUrl;
-        return;
-      }
+    mutationFn: (priceId: string) => switchFn({ data: { environment, priceId } }),
+    onSuccess: () => {
       toast.success("Cambio programado: se aplicará en tu próxima renovación.");
       void subscription.refetch();
     },
@@ -132,71 +120,38 @@ function PlansPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const buyMutation = useMutation({
-    mutationFn: (priceId: string) =>
-      createFn({
-        data: {
-          priceId,
-          environment,
-          returnUrl: `${window.location.origin}/planes?pago=ok`,
-          cancelUrl: `${window.location.origin}/planes?pago=cancelado`,
-        },
-      }),
-    onSuccess: (result) => {
-      if ("error" in result) {
-        toast.error(result.error);
-        return;
-      }
-      window.location.href = result.approveUrl;
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
   const buy = (plan: Exclude<PlanId, "free">) => {
     if (!user) return;
-    buyMutation.mutate(PRICE_IDS[plan]);
+    setCheckoutPriceId(PRICE_IDS[plan]);
   };
 
-  const [activating, setActivating] = useState(false);
+  /** Tras cerrar el pago, esperamos la confirmación del proveedor unos segundos. */
+  const waitForActivation = async () => {
+    setActivating(true);
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const result = await subscription.refetch();
+      const status = result.data?.status;
+      if (status && status !== "canceled" && status !== "incomplete") {
+        invalidate();
+        toast.success("¡Suscripción activada! Ya tienes tu nueva cuota de búsquedas.");
+        setActivating(false);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    setActivating(false);
+    invalidate();
+    toast.info("Estamos confirmando tu pago. Se activará en unos minutos.");
+  };
 
   const handledReturn = useRef(false);
   useEffect(() => {
     if (handledReturn.current || !user) return;
     const params = new URLSearchParams(window.location.search);
-    const outcome = params.get("pago");
-    if (!outcome) return;
+    if (!params.get("session_id") && !params.get("checkout")) return;
     handledReturn.current = true;
     window.history.replaceState({}, "", "/planes");
-
-    if (outcome === "cancelado") {
-      toast.info("Has cancelado el pago. No se ha cobrado nada.");
-      return;
-    }
-
-    const subscriptionId = params.get("subscription_id") ?? undefined;
-
-    const confirm = async () => {
-      setActivating(true);
-      for (let attempt = 0; attempt < 10; attempt += 1) {
-        await syncFn({
-          data: { environment, ...(subscriptionId ? { subscriptionId } : {}) },
-        });
-        const result = await subscription.refetch();
-        const status = result.data?.status;
-        if (status && status !== "canceled" && status !== "incomplete") {
-          invalidate();
-          toast.success("¡Suscripción activada! Ya tienes tu nueva cuota de búsquedas.");
-          setActivating(false);
-          return;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-      setActivating(false);
-      invalidate();
-      toast.info("Estamos confirmando tu pago. Se activará en unos minutos.");
-    };
-
-    void confirm();
+    void waitForActivation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -312,7 +267,7 @@ function PlansPage() {
                   <Button
                     className="mt-5 w-full"
                     variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent || switchMutation.isPending || buyMutation.isPending}
+                    disabled={isCurrent || switchMutation.isPending}
                     onClick={() => {
                       if (hasActiveSubscription && !pendingCancel) {
                         switchMutation.mutate(PRICE_IDS[id]);
@@ -325,7 +280,7 @@ function PlansPage() {
                       ? "Plan actual"
                       : hasActiveSubscription && !pendingCancel
                         ? `Cambiar a ${plan.name} (al renovar)`
-                        : `Suscribirme con PayPal por ${plan.price}`}
+                        : `Suscribirme por ${plan.price}`}
                   </Button>
                 )}
               </article>
@@ -334,15 +289,25 @@ function PlansPage() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          El pago se procesa de forma segura con PayPal: puedes pagar con tu cuenta PayPal o con
-          tarjeta, sin salir del proceso de compra. Puedes cancelar cuando quieras; mantendrás el
-          plan hasta el final del periodo pagado. Los cambios entre Mensual y Anual se aplican en tu
-          próxima renovación, sin cargos parciales.
+          El pago se procesa de forma segura a través de nuestro proveedor de pagos; no almacenamos
+          los datos de tu tarjeta. Puedes cancelar cuando quieras; mantendrás el plan hasta el final
+          del periodo pagado. Los cambios entre Mensual y Anual se aplican en tu próxima renovación,
+          sin cargos parciales.
         </p>
         <p className="text-xs text-muted-foreground">
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
           los planes, también cuando agotas la cuota de búsquedas.
         </p>
+
+        <StripeCheckoutDialog
+          priceId={checkoutPriceId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCheckoutPriceId(null);
+              void waitForActivation();
+            }
+          }}
+        />
       </div>
     </AppShell>
   );
