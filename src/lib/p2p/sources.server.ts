@@ -49,7 +49,7 @@ export const binanceP2PSource: P2PSource = {
         paymentMethod: row.adv?.tradeMethods?.[0]?.tradeMethodName ?? null,
         location: row.advertiser?.nickName ? null : null,
         counterparty: row.advertiser?.nickName ?? null,
-        sourceUrl: "https://p2p.binance.com/es/trade",
+        sourceUrl: binanceOfferUrl(params, row),
         timestamp: now,
         dataMode: "real",
       }));
