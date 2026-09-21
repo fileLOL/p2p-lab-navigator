@@ -138,6 +138,7 @@ export type Database = {
           data_mode: string
           fiat: string
           id: string
+          listing_url: string | null
           location: string | null
           payment_method: string | null
           price: number
@@ -160,6 +161,7 @@ export type Database = {
           data_mode: string
           fiat: string
           id?: string
+          listing_url?: string | null
           location?: string | null
           payment_method?: string | null
           price: number
@@ -182,6 +184,7 @@ export type Database = {
           data_mode?: string
           fiat?: string
           id?: string
+          listing_url?: string | null
           location?: string | null
           payment_method?: string | null
           price?: number
@@ -364,6 +367,30 @@ export type Database = {
         }
         Relationships: []
       }
+      paypal_plans: {
+        Row: {
+          created_at: string
+          environment: string
+          paypal_plan_id: string
+          paypal_product_id: string
+          price_id: string
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          paypal_plan_id: string
+          paypal_product_id: string
+          price_id: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          paypal_plan_id?: string
+          paypal_product_id?: string
+          price_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -478,9 +505,10 @@ export type Database = {
           pending_price_id: string | null
           price_id: string
           product_id: string
+          provider: string
+          provider_customer_id: string
+          provider_subscription_id: string
           status: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
           updated_at: string | null
           user_id: string
         }
@@ -495,9 +523,10 @@ export type Database = {
           pending_price_id?: string | null
           price_id: string
           product_id: string
+          provider?: string
+          provider_customer_id: string
+          provider_subscription_id: string
           status?: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
           updated_at?: string | null
           user_id: string
         }
@@ -512,9 +541,10 @@ export type Database = {
           pending_price_id?: string | null
           price_id?: string
           product_id?: string
+          provider?: string
+          provider_customer_id?: string
+          provider_subscription_id?: string
           status?: string
-          stripe_customer_id?: string
-          stripe_subscription_id?: string
           updated_at?: string | null
           user_id?: string
         }
