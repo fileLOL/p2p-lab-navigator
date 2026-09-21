@@ -314,7 +314,7 @@ export async function syncSubscription(
       user_id: userId,
       provider: "paypal",
       provider_subscription_id: subscriptionId,
-      provider_customer_id: remote.subscriber?.payer_id ?? null,
+      provider_customer_id: remote.subscriber?.payer_id ?? "",
       product_id: "p2plab_premium",
       price_id: remotePriceId,
       status,
