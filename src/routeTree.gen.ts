@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as GuiaRouteImport } from './routes/guia'
 import { Route as OauthCallbackRouteImport } from './routes/oauth-callback'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ReembolsosRouteImport } from './routes/reembolsos'
@@ -39,6 +40,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuiaRoute = GuiaRouteImport.update({
+  id: '/guia',
+  path: '/guia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OauthCallbackRoute = OauthCallbackRouteImport.update({
@@ -120,6 +126,7 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/guia': typeof GuiaRoute
   '/oauth-callback': typeof OauthCallbackRoute
   '/privacidad': typeof PrivacidadRoute
   '/reembolsos': typeof ReembolsosRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/guia': typeof GuiaRoute
   '/oauth-callback': typeof OauthCallbackRoute
   '/privacidad': typeof PrivacidadRoute
   '/reembolsos': typeof ReembolsosRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/guia': typeof GuiaRoute
   '/oauth-callback': typeof OauthCallbackRoute
   '/privacidad': typeof PrivacidadRoute
   '/reembolsos': typeof ReembolsosRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/guia'
     | '/oauth-callback'
     | '/privacidad'
     | '/reembolsos'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/guia'
     | '/oauth-callback'
     | '/privacidad'
     | '/reembolsos'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/guia'
     | '/oauth-callback'
     | '/privacidad'
     | '/reembolsos'
@@ -235,6 +247,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  GuiaRoute: typeof GuiaRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
   PrivacidadRoute: typeof PrivacidadRoute
   ReembolsosRoute: typeof ReembolsosRoute
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guia': {
+      id: '/guia'
+      path: '/guia'
+      fullPath: '/guia'
+      preLoaderRoute: typeof GuiaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/oauth-callback': {
@@ -396,6 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  GuiaRoute: GuiaRoute,
   OauthCallbackRoute: OauthCallbackRoute,
   PrivacidadRoute: PrivacidadRoute,
   ReembolsosRoute: ReembolsosRoute,
