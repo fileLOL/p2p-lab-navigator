@@ -96,9 +96,9 @@ interface BinanceAdv {
     price?: string;
     minSingleTransAmount?: string;
     maxSingleTransAmount?: string;
-    tradeMethods?: { tradeMethodName?: string }[];
+    tradeMethods?: { tradeMethodName?: string; identifier?: string }[];
   };
-  advertiser?: { nickName?: string };
+  advertiser?: { nickName?: string; userNo?: string };
 }
 
 /** Plantilla para futuras fuentes que aún requieren credenciales. */
