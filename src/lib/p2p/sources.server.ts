@@ -1,5 +1,25 @@
 import type { P2PSource, RawOffer, SearchParams, SourceResult } from "./types";
 
+/**
+ * Enlace directo al anuncio concreto en Binance P2P.
+ * Si el anuncio trae identificador del anunciante, se abre su ficha;
+ * si no, se abre el listado ya filtrado por activo, moneda, método e importe.
+ */
+function binanceOfferUrl(params: SearchParams, row: BinanceAdv): string {
+  const advertiserNo = row.advertiser?.userNo;
+  if (advertiserNo) {
+    return `https://p2p.binance.com/es/advertiserDetail?advertiserNo=${encodeURIComponent(advertiserNo)}`;
+  }
+  const query = new URLSearchParams({
+    fiat: row.adv?.fiatUnit ?? params.fiat,
+    payment: row.adv?.tradeMethods?.[0]?.identifier ?? params.paymentMethod ?? "all-payments",
+  });
+  if (params.amount) query.set("amount", String(params.amount));
+  const side = params.side === "buy" ? "buy" : "sell";
+  const asset = row.adv?.asset ?? params.asset;
+  return `https://p2p.binance.com/es/trade/${side}/${encodeURIComponent(asset)}?${query.toString()}`;
+}
+
 /** Adaptador real: Binance P2P (endpoint público, sin credenciales). */
 export const binanceP2PSource: P2PSource = {
   key: "binance_p2p",
@@ -49,7 +69,7 @@ export const binanceP2PSource: P2PSource = {
         paymentMethod: row.adv?.tradeMethods?.[0]?.tradeMethodName ?? null,
         location: row.advertiser?.nickName ? null : null,
         counterparty: row.advertiser?.nickName ?? null,
-        sourceUrl: "https://p2p.binance.com/es/trade",
+        sourceUrl: binanceOfferUrl(params, row),
         timestamp: now,
         dataMode: "real",
       }));
@@ -76,9 +96,9 @@ interface BinanceAdv {
     price?: string;
     minSingleTransAmount?: string;
     maxSingleTransAmount?: string;
-    tradeMethods?: { tradeMethodName?: string }[];
+    tradeMethods?: { tradeMethodName?: string; identifier?: string }[];
   };
-  advertiser?: { nickName?: string };
+  advertiser?: { nickName?: string; userNo?: string };
 }
 
 /** Plantilla para futuras fuentes que aún requieren credenciales. */

@@ -46,7 +46,11 @@ async function signedRequest<T>(
     false,
     ["sign"],
   );
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(query.toString()));
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(query.toString()),
+  );
   const sigHex = Array.from(new Uint8Array(signature))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -118,7 +122,8 @@ export function translateBinanceError(error: unknown): string {
     if (error.code === -2015)
       return "Claves inválidas, sin permiso de trading o IP no autorizada. Revisa la configuración de la clave en Binance.";
     if (error.code === -2014 || error.code === -2016) return "Las claves no son válidas.";
-    if (error.code === -2010) return "Fondos insuficientes en tu cuenta de Binance para esta orden.";
+    if (error.code === -2010)
+      return "Fondos insuficientes en tu cuenta de Binance para esta orden.";
     if (error.code === -1013 || error.code === -1111)
       return "La cantidad no cumple los mínimos o el formato del par en Binance.";
     if (error.code === -1121) return "El par de trading no existe en Binance.";

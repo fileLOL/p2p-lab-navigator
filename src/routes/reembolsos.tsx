@@ -8,7 +8,7 @@ export const Route = createFileRoute("/reembolsos")({
       {
         name: "description",
         content:
-          "Política de reembolsos de P2P Lab: garantía de devolución de 30 días gestionada a través de nuestro proveedor de pagos.",
+          "Política de reembolsos de P2P Lab: garantía de devolución de 30 días gestionada a través de PayPal, nuestro proveedor de pagos,.",
       },
       { property: "og:title", content: "Política de Reembolsos — P2P Lab" },
       {
@@ -62,7 +62,7 @@ function ReembolsosPage() {
 
             <Section title="Cómo solicitar un reembolso">
               <p>
-                Los reembolsos los gestiona nuestro proveedor de pagos. Para solicitar un
+                Los reembolsos los gestiona PayPal, nuestro proveedor de pagos,. Para solicitar un
                 reembolso:
               </p>
               <ul className="list-disc space-y-1 pl-5">
@@ -73,16 +73,16 @@ function ReembolsosPage() {
                 <li>contacta con nuestro equipo de soporte y gestionaremos la solicitud.</li>
               </ul>
               <p>
-                Tramitamos los reembolsos dentro de los 30 días posteriores al cobro y el
-                abono llega al mismo método de pago que usaste al comprar.
+                Tramitamos los reembolsos dentro de los 30 días posteriores al cobro y el abono
+                llega al mismo método de pago que usaste al comprar.
               </p>
             </Section>
 
             <Section title="Cancelaciones">
               <p>
-                Cancelar tu suscripción no es lo mismo que pedir un reembolso: al cancelar, dejas
-                de renovar y mantienes el acceso hasta el final del periodo ya pagado. Puedes
-                cancelar desde la sección de planes o desde el portal de facturación.
+                Cancelar tu suscripción no es lo mismo que pedir un reembolso: al cancelar, dejas de
+                renovar y mantienes el acceso hasta el final del periodo ya pagado. Puedes cancelar
+                desde la sección de planes o desde el portal de facturación.
               </p>
             </Section>
           </CardContent>

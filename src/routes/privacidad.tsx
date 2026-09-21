@@ -56,8 +56,8 @@ function PrivacidadPage() {
               <p>
                 El responsable del tratamiento de tus datos personales es Fundación P2P, con
                 domicilio en Realengracht 196, 1013AV, Ámsterdam, Países Bajos, que opera bajo la
-                marca comercial P2P Lab («el responsable», «nosotros»). Actuamos como responsable
-                de los datos recogidos a través del servicio.
+                marca comercial P2P Lab («el responsable», «nosotros»). Actuamos como responsable de
+                los datos recogidos a través del servicio.
               </p>
             </Section>
 
@@ -87,16 +87,17 @@ function PrivacidadPage() {
                 </li>
               </ul>
               <p>
-                Los datos de pago los recoge y trata directamente nuestro proveedor de pagos, que
-                gestiona el cobro y la facturación; no almacenamos los datos de tu tarjeta.
+                Los datos de pago los recoge y trata directamente PayPal, nuestro proveedor de
+                pagos,, que gestiona el cobro y la facturación; no almacenamos los datos de tu
+                tarjeta.
               </p>
             </Section>
 
             <Section title="3. Base legal">
               <p>
                 Tratamos tus datos sobre la base de la ejecución del contrato, nuestro interés
-                legítimo (seguridad, prevención del fraude, mejora del producto), tu
-                consentimiento cuando lo solicitemos y el cumplimiento de obligaciones legales.
+                legítimo (seguridad, prevención del fraude, mejora del producto), tu consentimiento
+                cuando lo solicitemos y el cumplimiento de obligaciones legales.
               </p>
             </Section>
 
@@ -107,8 +108,8 @@ function PrivacidadPage() {
                   herramientas de soporte).
                 </li>
                 <li>
-                  Nuestro proveedor de pagos, para la venta del producto, gestión de
-                  suscripciones, cobros, cumplimiento fiscal y facturación.
+                  Nuestro proveedor de pagos, para la venta del producto, gestión de suscripciones,
+                  cobros, cumplimiento fiscal y facturación.
                 </li>
                 <li>Asesores profesionales (legales, contables) cuando sea necesario.</li>
                 <li>Autoridades cuando la ley lo exija.</li>
@@ -118,10 +119,10 @@ function PrivacidadPage() {
             <Section title="5. Conservación">
               <p>
                 Conservamos tus datos mientras mantengas tu cuenta y, después, durante los plazos
-                exigidos por ley. Cuando ya no sean necesarios, los eliminamos o anonimizamos.
-                Para hacer cumplir las cuotas del plan gratuito conservamos, tras la baja de la
-                cuenta, un registro pseudonimizado (huella criptográfica del correo) del uso del
-                día, que no permite recuperar tu cuenta ni tus datos.
+                exigidos por ley. Cuando ya no sean necesarios, los eliminamos o anonimizamos. Para
+                hacer cumplir las cuotas del plan gratuito conservamos, tras la baja de la cuenta,
+                un registro pseudonimizado (huella criptográfica del correo) del uso del día, que no
+                permite recuperar tu cuenta ni tus datos.
               </p>
             </Section>
 
@@ -136,8 +137,8 @@ function PrivacidadPage() {
               <p>
                 Puedes ejercer los derechos de acceso, rectificación, supresión, limitación,
                 portabilidad y oposición, así como retirar el consentimiento, escribiéndonos a
-                través del servicio. Responderemos en el plazo de un mes. También tienes derecho
-                a reclamar ante la autoridad de control (en los Países Bajos, la Autoriteit
+                través del servicio. Responderemos en el plazo de un mes. También tienes derecho a
+                reclamar ante la autoridad de control (en los Países Bajos, la Autoriteit
                 Persoonsgegevens, o la autoridad de tu país de residencia).
               </p>
             </Section>
@@ -151,10 +152,10 @@ function PrivacidadPage() {
 
             <Section title="9. Cookies">
               <p>
-                Utilizamos cookies y almacenamiento local estrictamente necesarios para la sesión
-                y las preferencias de la aplicación. No usamos cookies de marketing. Puedes
-                gestionar o eliminar estas cookies desde la configuración de tu navegador; si las
-                bloqueas, es posible que el acceso a tu cuenta no funcione.
+                Utilizamos cookies y almacenamiento local estrictamente necesarios para la sesión y
+                las preferencias de la aplicación. No usamos cookies de marketing. Puedes gestionar
+                o eliminar estas cookies desde la configuración de tu navegador; si las bloqueas, es
+                posible que el acceso a tu cuenta no funcione.
               </p>
             </Section>
           </CardContent>

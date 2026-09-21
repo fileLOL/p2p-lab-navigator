@@ -35,14 +35,12 @@ export const Route = createFileRoute("/_authenticated/trading-real")({
       { title: "Trading real — P2P Lab" },
       {
         name: "description",
-        content:
-          "Opera con criptomonedas reales desde P2P Lab usando tu propia cuenta de Binance.",
+        content: "Opera con criptomonedas reales desde P2P Lab usando tu propia cuenta de Binance.",
       },
       { property: "og:title", content: "Trading real — P2P Lab" },
       {
         property: "og:description",
-        content:
-          "Opera con criptomonedas reales desde P2P Lab usando tu propia cuenta de Binance.",
+        content: "Opera con criptomonedas reales desde P2P Lab usando tu propia cuenta de Binance.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -66,13 +64,16 @@ function TradingRealPage() {
   };
 
   return (
-    <AppShell title="Trading real" subtitle="Opera con dinero real desde tu propia cuenta de Binance">
+    <AppShell
+      title="Trading real"
+      subtitle="Opera con dinero real desde tu propia cuenta de Binance"
+    >
       <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
         <AlertTriangle className="mt-0.5 size-4 shrink-0" />
         <p>
           Esto no es una simulación: las órdenes se ejecutan con dinero real en tu cuenta de
-          Binance. P2P Lab no custodia fondos ni garantiza resultados; tú eres el único
-          responsable de tus operaciones.
+          Binance. P2P Lab no custodia fondos ni garantiza resultados; tú eres el único responsable
+          de tus operaciones.
         </p>
       </div>
 
@@ -123,7 +124,9 @@ function ConnectForm({ onConnected }: { onConnected: () => void }) {
             retiradas.
           </li>
           <li>Si puedes, restringe la clave por IP.</li>
-          <li>Pega aquí la clave y el secreto; los guardamos cifrados y nunca salen del servidor.</li>
+          <li>
+            Pega aquí la clave y el secreto; los guardamos cifrados y nunca salen del servidor.
+          </li>
         </ol>
         <div className="space-y-2">
           <Label htmlFor="api-key">API Key</Label>
@@ -269,7 +272,9 @@ function ConnectedView({
           {ordersQuery.isLoading ? (
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
           ) : (ordersQuery.data?.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground">Todavía no has ejecutado órdenes reales.</p>
+            <p className="text-sm text-muted-foreground">
+              Todavía no has ejecutado órdenes reales.
+            </p>
           ) : (
             <ul className="divide-y divide-border text-sm">
               {ordersQuery.data?.map((o) => (
@@ -327,8 +332,7 @@ function OrderForm({ onChanged }: { onChanged: () => void }) {
   });
 
   const qty = Number(quantity);
-  const estimated =
-    priceQuery.data?.price != null && qty > 0 ? qty * priceQuery.data.price : null;
+  const estimated = priceQuery.data?.price != null && qty > 0 ? qty * priceQuery.data.price : null;
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -413,11 +417,8 @@ function OrderForm({ onChanged }: { onChanged: () => void }) {
         <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
           {estimated != null ? (
             <p>
-              Valor estimado:{" "}
-              <strong>
-                {formatMoney(estimated, fiat as "EUR" | "USD")}
-              </strong>{" "}
-              ({qty} {asset} × {priceQuery.data?.price?.toLocaleString("es-ES")} {fiat})
+              Valor estimado: <strong>{formatMoney(estimated, fiat as "EUR" | "USD")}</strong> (
+              {qty} {asset} × {priceQuery.data?.price?.toLocaleString("es-ES")} {fiat})
             </p>
           ) : (
             <p className="text-muted-foreground">

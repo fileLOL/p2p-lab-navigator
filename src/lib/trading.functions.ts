@@ -46,7 +46,8 @@ export const getExchangeConnection = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ExchangeConnectionDTO> => {
     const row = await loadUserKeys(context.userId);
-    if (!row) return { connected: false, exchange: "binance", apiKeyPreview: null, createdAt: null };
+    if (!row)
+      return { connected: false, exchange: "binance", apiKeyPreview: null, createdAt: null };
     return {
       connected: true,
       exchange: row.exchange,
@@ -56,8 +57,16 @@ export const getExchangeConnection = createServerFn({ method: "GET" })
   });
 
 const connectSchema = z.object({
-  apiKey: z.string().min(10).max(128).regex(/^[A-Za-z0-9]+$/),
-  apiSecret: z.string().min(10).max(128).regex(/^[A-Za-z0-9]+$/),
+  apiKey: z
+    .string()
+    .min(10)
+    .max(128)
+    .regex(/^[A-Za-z0-9]+$/),
+  apiSecret: z
+    .string()
+    .min(10)
+    .max(128)
+    .regex(/^[A-Za-z0-9]+$/),
 });
 
 export const connectExchange = createServerFn({ method: "POST" })
@@ -107,7 +116,10 @@ export const getRealBalances = createServerFn({ method: "GET" })
     const { decryptSecret } = await import("@/lib/exchange-crypto.server");
     const { fetchAccountBalances, translateBinanceError } = await import("@/lib/binance.server");
     try {
-      const balances = await fetchAccountBalances(row.api_key, decryptSecret(row.api_secret_encrypted));
+      const balances = await fetchAccountBalances(
+        row.api_key,
+        decryptSecret(row.api_secret_encrypted),
+      );
       return { balances: balances satisfies RealBalanceDTO[] };
     } catch (error) {
       throw new Error(translateBinanceError(error));
@@ -117,9 +129,7 @@ export const getRealBalances = createServerFn({ method: "GET" })
 export const getRealPrice = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({ asset: z.string().min(2).max(10), fiat: z.string().min(3).max(4) })
-      .parse(input),
+    z.object({ asset: z.string().min(2).max(10), fiat: z.string().min(3).max(4) }).parse(input),
   )
   .handler(async ({ data }) => {
     const { fetchSymbolPrice } = await import("@/lib/binance.server");
@@ -150,11 +160,15 @@ export const placeRealOrder = createServerFn({ method: "POST" })
 
     let result;
     try {
-      result = await binance.placeMarketOrder(row.api_key, decryptSecret(row.api_secret_encrypted), {
-        symbol,
-        side: data.side,
-        quantity: data.quantity,
-      });
+      result = await binance.placeMarketOrder(
+        row.api_key,
+        decryptSecret(row.api_secret_encrypted),
+        {
+          symbol,
+          side: data.side,
+          quantity: data.quantity,
+        },
+      );
     } catch (error) {
       const message = binance.translateBinanceError(error);
       await context.supabase.from("real_orders").insert({
@@ -189,7 +203,9 @@ export const listRealOrders = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("real_orders")
-      .select("id, exchange, symbol, side, quantity, price, quote_quantity, order_id, status, error, created_at")
+      .select(
+        "id, exchange, symbol, side, quantity, price, quote_quantity, order_id, status, error, created_at",
+      )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(50);
