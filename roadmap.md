@@ -15,3 +15,9 @@
 - [ ] Pendiente usuario: Stripe debe activar los métodos de pago de la cuenta real (verificación en curso)
 - [ ] Pendiente usuario: dominio de correo para el email de bienvenida
 - [x] Sección "Trading real" con Binance Spot: conexión con claves API cifradas (AES-256-GCM), saldos reales, órdenes a mercado con doble confirmación, historial, desconexión. Términos actualizados (sin custodia).
+
+## 2026-09-21 — Vuelta al cobro integrado con tarjeta
+- [x] Restaurados cliente de pagos, checkout embebido, receptor de avisos y pantalla de Planes
+- [x] Eliminado PayPal del código y de las páginas legales
+- [x] Probado en vista previa: la ventana de pago abre en modo pruebas
+- [ ] Pendiente del usuario: verificación de la cuenta de cobros para activar los cobros reales

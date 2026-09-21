@@ -8,7 +8,7 @@ export const Route = createFileRoute("/reembolsos")({
       {
         name: "description",
         content:
-          "Política de reembolsos de P2P Lab: garantía de devolución de 30 días gestionada a través de PayPal, nuestro proveedor de pagos,.",
+          "Política de reembolsos de P2P Lab: garantía de devolución de 30 días gestionada a través de nuestro proveedor de pagos.",
       },
       { property: "og:title", content: "Política de Reembolsos — P2P Lab" },
       {
@@ -62,8 +62,7 @@ function ReembolsosPage() {
 
             <Section title="Cómo solicitar un reembolso">
               <p>
-                Los reembolsos los gestiona PayPal, nuestro proveedor de pagos,. Para solicitar un
-                reembolso:
+                Los reembolsos los gestiona nuestro proveedor de pagos. Para solicitar un reembolso:
               </p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>

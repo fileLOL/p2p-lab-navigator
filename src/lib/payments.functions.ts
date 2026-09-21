@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { PayPalSubscription } from "@/lib/paypal.server";
+import type Stripe from "stripe";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { type StripeEnv } from "@/lib/stripe.server";
 
 const envSchema = z.enum(["sandbox", "live"]);
 
@@ -11,18 +12,59 @@ const ALLOWED_PRICE_IDS = new Set(["p2plab_premium_monthly", "p2plab_premium_yea
 const SUBSCRIPTION_COLUMNS =
   "provider_subscription_id, status, price_id, pending_price_id, current_period_end, cancel_at_period_end";
 
-type PayPalEnvironment = "sandbox" | "live";
-
-async function loadPayPal() {
-  return import("@/lib/paypal.server");
+async function loadStripe(environment: StripeEnv) {
+  const { createStripeClient, getStripeErrorMessage, usesManagedPayments } =
+    await import("@/lib/stripe.server");
+  return {
+    stripe: createStripeClient(environment),
+    getStripeErrorMessage,
+    managed: usesManagedPayments(environment),
+  };
 }
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "No se ha podido completar la operación de pago.";
+async function resolveOrCreateCustomer(
+  stripe: Stripe,
+  options: { email?: string; userId: string },
+): Promise<string> {
+  if (!/^[a-zA-Z0-9_-]+$/.test(options.userId)) throw new Error("Invalid userId");
+
+  const found = await stripe.customers.search({
+    query: `metadata['userId']:'${options.userId}'`,
+    limit: 1,
+  });
+  if (found.data.length && found.data[0]) return found.data[0].id;
+
+  if (options.email) {
+    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
+    const customer = existing.data[0];
+    if (customer) {
+      if (customer.metadata?.["userId"] !== options.userId) {
+        await stripe.customers.update(customer.id, {
+          metadata: { ...customer.metadata, userId: options.userId },
+        });
+      }
+      return customer.id;
+    }
+  }
+
+  const created = await stripe.customers.create({
+    ...(options.email ? { email: options.email } : {}),
+    metadata: { userId: options.userId },
+  });
+  return created.id;
 }
 
-/** Crea la suscripción en el proveedor y devuelve el enlace de aprobación. */
-export const createSubscription = createServerFn({ method: "POST" })
+async function resolveStripePriceId(stripe: Stripe, priceId: string): Promise<string> {
+  const prices = await stripe.prices.list({ lookup_keys: [priceId] });
+  const price = prices.data[0];
+  if (!price) throw new Error("El plan seleccionado no está disponible.");
+  return price.id;
+}
+
+type CheckoutSessionResult = { clientSecret: string } | { error: string };
+
+/** Crea la sesión de pago embebida para suscribirse a un plan. */
+export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
@@ -30,82 +72,40 @@ export const createSubscription = createServerFn({ method: "POST" })
         priceId: z.string().min(1).max(80),
         environment: envSchema,
         returnUrl: z.string().url(),
-        cancelUrl: z.string().url(),
       })
       .parse(input),
   )
-  .handler(async ({ data, context }): Promise<{ approveUrl: string } | { error: string }> => {
+  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     if (!ALLOWED_PRICE_IDS.has(data.priceId)) return { error: "Plan no válido." };
-    const paypal = await loadPayPal();
-    if (!paypal.isKnownPrice(data.priceId)) return { error: "Plan no válido." };
-
+    const { stripe, getStripeErrorMessage, managed } = await loadStripe(data.environment);
     try {
       const {
         data: { user },
       } = await context.supabase.auth.getUser();
 
-      const planId = await paypal.ensurePlan(data.environment, data.priceId);
-      const subscription = await paypal.paypalFetch<PayPalSubscription>(
-        data.environment,
-        "/v1/billing/subscriptions",
-        {
-          method: "POST",
-          body: {
-            plan_id: planId,
-            custom_id: context.userId,
-            ...(user?.email ? { subscriber: { email_address: user.email } } : {}),
-            application_context: {
-              brand_name: "P2P Lab",
-              locale: "es-ES",
-              shipping_preference: "NO_SHIPPING",
-              user_action: "SUBSCRIBE_NOW",
-              return_url: data.returnUrl,
-              cancel_url: data.cancelUrl,
-            },
-          },
+      const stripePriceId = await resolveStripePriceId(stripe, data.priceId);
+      const customerId = await resolveOrCreateCustomer(stripe, {
+        userId: context.userId,
+        ...(user?.email ? { email: user.email } : {}),
+      });
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{ price: stripePriceId, quantity: 1 }],
+        mode: "subscription",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer: customerId,
+        metadata: {
+          userId: context.userId,
+          ...(managed ? { managed_payments: "true" } : {}),
         },
-      );
+        subscription_data: { metadata: { userId: context.userId } },
+        ...(managed ? { managed_payments: { enabled: true } } : {}),
+      } as Stripe.Checkout.SessionCreateParams);
 
-      const approveUrl = paypal.approveUrlFrom(subscription.links);
-      if (!approveUrl) return { error: "No se ha podido iniciar el pago." };
-      return { approveUrl };
+      return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
-      return { error: errorMessage(error) };
-    }
-  });
-
-/** Lee el estado real en el proveedor y lo guarda (usado al volver del pago). */
-export const syncSubscriptionState = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({ environment: envSchema, subscriptionId: z.string().min(1).max(80).optional() })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    let subscriptionId = data.subscriptionId;
-    if (!subscriptionId) {
-      const { data: row } = await context.supabase
-        .from("subscriptions")
-        .select("provider_subscription_id")
-        .eq("user_id", context.userId)
-        .eq("environment", data.environment)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      subscriptionId = row?.provider_subscription_id;
-    }
-    if (!subscriptionId) return { ok: false as const };
-
-    const paypal = await loadPayPal();
-    try {
-      const remote = await paypal.getRemoteSubscription(data.environment, subscriptionId);
-      if (remote.custom_id && remote.custom_id !== context.userId) return { ok: false as const };
-      await paypal.syncSubscription(data.environment, subscriptionId);
-      return { ok: true as const };
-    } catch (error) {
-      console.error("No se pudo sincronizar la suscripción:", errorMessage(error));
-      return { ok: false as const };
+      return { error: getStripeErrorMessage(error) };
     }
   });
 
@@ -137,8 +137,8 @@ export const getSubscription = createServerFn({ method: "GET" })
   });
 
 /**
- * Cancela la suscripción: no se cobran más renovaciones, pero el usuario
- * mantiene su plan hasta el final del periodo ya pagado.
+ * Cancela la suscripción: se programa al final del periodo ya pagado,
+ * así el usuario mantiene su plan hasta la fecha de renovación.
  */
 export const cancelSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -158,48 +158,31 @@ export const cancelSubscription = createServerFn({ method: "POST" })
       throw new Error("Esta suscripción ya está cancelada.");
     }
 
-    const paypal = await loadPayPal();
+    const { stripe, getStripeErrorMessage } = await loadStripe(data.environment);
     try {
-      await paypal.paypalFetch(
-        data.environment as PayPalEnvironment,
-        `/v1/billing/subscriptions/${row.provider_subscription_id}/cancel`,
-        { method: "POST", body: { reason: "Cancelada por el usuario desde P2P Lab" } },
-      );
+      await stripe.subscriptions.update(row.provider_subscription_id, {
+        cancel_at_period_end: true,
+      });
     } catch (error) {
-      throw new Error(errorMessage(error));
+      throw new Error(getStripeErrorMessage(error));
     }
-
-    const keepsAccess =
-      row.current_period_end && new Date(row.current_period_end).getTime() > Date.now();
 
     await context.supabase
       .from("subscriptions")
-      .update({
-        cancel_at_period_end: true,
-        status: keepsAccess ? "canceling" : "canceled",
-        pending_price_id: null,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ cancel_at_period_end: true, updated_at: new Date().toISOString() })
       .eq("provider_subscription_id", row.provider_subscription_id);
 
     return { ok: true, current_period_end: row.current_period_end as string | null };
   });
 
 /**
- * Cambia entre Mensual y Anual. El proveedor pide aprobar el cambio;
- * las ventajas del nuevo plan llegan con el cobro de la renovación.
+ * Cambia entre Mensual y Anual: se aplica en la siguiente renovación,
+ * sin cargos ni reembolsos parciales en el periodo actual.
  */
 export const changeSubscriptionPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({
-        environment: envSchema,
-        priceId: z.string().min(1).max(80),
-        returnUrl: z.string().url(),
-        cancelUrl: z.string().url(),
-      })
-      .parse(input),
+    z.object({ environment: envSchema, priceId: z.string().min(1).max(80) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     if (!ALLOWED_PRICE_IDS.has(data.priceId)) throw new Error("Plan no válido.");
@@ -222,63 +205,51 @@ export const changeSubscriptionPlan = createServerFn({ method: "POST" })
       throw new Error("Ya tienes ese plan programado.");
     }
 
-    const paypal = await loadPayPal();
-    if (!paypal.isKnownPrice(data.priceId)) throw new Error("Plan no válido.");
-
+    const { stripe, getStripeErrorMessage } = await loadStripe(data.environment);
     try {
-      const planId = await paypal.ensurePlan(data.environment, data.priceId);
-      const revised = await paypal.paypalFetch<{
-        links?: { rel: string; href: string }[];
-      }>(
-        data.environment as PayPalEnvironment,
-        `/v1/billing/subscriptions/${row.provider_subscription_id}/revise`,
-        {
-          method: "POST",
-          body: {
-            plan_id: planId,
-            application_context: {
-              brand_name: "P2P Lab",
-              locale: "es-ES",
-              return_url: data.returnUrl,
-              cancel_url: data.cancelUrl,
-            },
-          },
-        },
-      );
+      const stripePriceId = await resolveStripePriceId(stripe, data.priceId);
+      const subscription = await stripe.subscriptions.retrieve(row.provider_subscription_id);
+      const itemId = subscription.items.data[0]?.id;
+      if (!itemId) throw new Error("No tienes ninguna suscripción activa que cambiar.");
 
-      const approveUrl = paypal.approveUrlFrom(revised.links);
-      if (approveUrl) return { ok: true as const, approveUrl };
-
-      await paypal.syncSubscription(
-        data.environment as PayPalEnvironment,
-        row.provider_subscription_id,
-      );
-      return { ok: true as const, approveUrl: null };
+      await stripe.subscriptions.update(row.provider_subscription_id, {
+        items: [{ id: itemId, price: stripePriceId }],
+        proration_behavior: "none",
+        billing_cycle_anchor: "unchanged",
+      });
     } catch (error) {
-      throw new Error(errorMessage(error));
+      throw new Error(getStripeErrorMessage(error));
     }
+
+    return { ok: true };
   });
 
-/** Gestión del método de pago y las facturas en la cuenta del proveedor. */
+/** Enlace al portal de facturación para gestionar el método de pago o las facturas. */
 export const getBillingPortalUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ environment: envSchema }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ environment: envSchema, returnUrl: z.string().url().optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("subscriptions")
-      .select("provider_subscription_id")
+      .select("provider_customer_id")
       .eq("user_id", context.userId)
       .eq("environment", data.environment)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row?.provider_subscription_id) throw new Error("No tienes ninguna suscripción activa.");
+    if (!row?.provider_customer_id) throw new Error("No tienes ninguna suscripción activa.");
 
-    return {
-      url:
-        data.environment === "sandbox"
-          ? "https://www.sandbox.paypal.com/myaccount/autopay/"
-          : "https://www.paypal.com/myaccount/autopay/",
-    };
+    const { stripe, getStripeErrorMessage } = await loadStripe(data.environment);
+    try {
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: row.provider_customer_id,
+        ...(data.returnUrl ? { return_url: data.returnUrl } : {}),
+      });
+      return { url: portal.url };
+    } catch (error) {
+      throw new Error(getStripeErrorMessage(error));
+    }
   });
