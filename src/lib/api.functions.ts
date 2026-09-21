@@ -509,7 +509,6 @@ export const deleteAccount = createServerFn({ method: "POST" })
       }
     }
 
-
     const { error } = await context.supabase.rpc("delete_my_account");
     if (error) throw new Error(error.message);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

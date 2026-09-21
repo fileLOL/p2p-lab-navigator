@@ -29,9 +29,7 @@ export function isKnownPrice(priceId: string): priceId is PriceId {
 
 function credentials(env: PayPalEnv): { clientId: string; secret: string } {
   const clientId =
-    env === "sandbox"
-      ? process.env["PAYPAL_SANDBOX_CLIENT_ID"]
-      : process.env["PAYPAL_CLIENT_ID"];
+    env === "sandbox" ? process.env["PAYPAL_SANDBOX_CLIENT_ID"] : process.env["PAYPAL_CLIENT_ID"];
   const secret =
     env === "sandbox"
       ? process.env["PAYPAL_SANDBOX_CLIENT_SECRET"]
@@ -285,8 +283,7 @@ export async function syncSubscription(
 
   // Un cambio de plan aprobado no debe dar las ventajas del nuevo plan
   // hasta que se cobre: queda pendiente hasta la renovación.
-  const scheduledChange =
-    Boolean(existing) && samePeriod && remotePriceId !== existing?.price_id;
+  const scheduledChange = Boolean(existing) && samePeriod && remotePriceId !== existing?.price_id;
 
   const cancelAtPeriodEnd =
     existing?.cancel_at_period_end ??

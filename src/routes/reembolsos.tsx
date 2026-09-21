@@ -73,16 +73,16 @@ function ReembolsosPage() {
                 <li>contacta con nuestro equipo de soporte y gestionaremos la solicitud.</li>
               </ul>
               <p>
-                Tramitamos los reembolsos dentro de los 30 días posteriores al cobro y el
-                abono llega al mismo método de pago que usaste al comprar.
+                Tramitamos los reembolsos dentro de los 30 días posteriores al cobro y el abono
+                llega al mismo método de pago que usaste al comprar.
               </p>
             </Section>
 
             <Section title="Cancelaciones">
               <p>
-                Cancelar tu suscripción no es lo mismo que pedir un reembolso: al cancelar, dejas
-                de renovar y mantienes el acceso hasta el final del periodo ya pagado. Puedes
-                cancelar desde la sección de planes o desde el portal de facturación.
+                Cancelar tu suscripción no es lo mismo que pedir un reembolso: al cancelar, dejas de
+                renovar y mantienes el acceso hasta el final del periodo ya pagado. Puedes cancelar
+                desde la sección de planes o desde el portal de facturación.
               </p>
             </Section>
           </CardContent>

@@ -184,14 +184,22 @@ function Landing() {
             <Link to="/guia" className="underline-offset-2 hover:text-foreground hover:underline">
               Guía de uso
             </Link>
-            <Link to="/terminos" className="underline-offset-2 hover:text-foreground hover:underline">
-
+            <Link
+              to="/terminos"
+              className="underline-offset-2 hover:text-foreground hover:underline"
+            >
               Términos y Condiciones
             </Link>
-            <Link to="/privacidad" className="underline-offset-2 hover:text-foreground hover:underline">
+            <Link
+              to="/privacidad"
+              className="underline-offset-2 hover:text-foreground hover:underline"
+            >
               Política de Privacidad
             </Link>
-            <Link to="/reembolsos" className="underline-offset-2 hover:text-foreground hover:underline">
+            <Link
+              to="/reembolsos"
+              className="underline-offset-2 hover:text-foreground hover:underline"
+            >
               Política de Reembolsos
             </Link>
           </nav>

@@ -18,9 +18,7 @@ async function loadPayPal() {
 }
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "No se ha podido completar la operación de pago.";
+  return error instanceof Error ? error.message : "No se ha podido completar la operación de pago.";
 }
 
 /** Crea la suscripción en el proveedor y devuelve el enlace de aprobación. */
