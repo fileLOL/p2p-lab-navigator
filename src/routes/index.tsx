@@ -181,7 +181,11 @@ function Landing() {
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs text-muted-foreground">
           <p>{GENERAL_DISCLAIMER}</p>
           <nav className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link to="/guia" className="underline-offset-2 hover:text-foreground hover:underline">
+              Guía de uso
+            </Link>
             <Link to="/terminos" className="underline-offset-2 hover:text-foreground hover:underline">
+
               Términos y Condiciones
             </Link>
             <Link to="/privacidad" className="underline-offset-2 hover:text-foreground hover:underline">
