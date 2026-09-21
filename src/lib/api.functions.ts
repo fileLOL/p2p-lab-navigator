@@ -488,15 +488,18 @@ export const deleteAccount = createServerFn({ method: "POST" })
     // Cancelar de inmediato cualquier suscripción para que no se siga cobrando.
     const { data: subs } = await context.supabase
       .from("subscriptions")
-      .select("stripe_subscription_id, environment, status")
+      .select("provider_subscription_id, environment, status")
       .eq("user_id", context.userId);
     if (subs?.length) {
-      const { createStripeClient } = await import("@/lib/stripe.server");
+      const { paypalFetch } = await import("@/lib/paypal.server");
       for (const sub of subs) {
         if (sub.status === "canceled") continue;
         try {
-          const stripe = createStripeClient(sub.environment as "sandbox" | "live");
-          await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+          await paypalFetch(
+            sub.environment as "sandbox" | "live",
+            `/v1/billing/subscriptions/${sub.provider_subscription_id}/cancel`,
+            { method: "POST", body: { reason: "Cuenta eliminada por el usuario" } },
+          );
         } catch (cancelError) {
           console.error("No se pudo cancelar la suscripción al borrar la cuenta", cancelError);
           throw new Error(
@@ -505,6 +508,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
         }
       }
     }
+
 
     const { error } = await context.supabase.rpc("delete_my_account");
     if (error) throw new Error(error.message);
