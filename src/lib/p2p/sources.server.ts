@@ -168,12 +168,84 @@ export const bybitSource = pendingSource(
   "https://www.bybit.com/fiat/trade/otc",
   "Requiere credenciales de API.",
 );
-export const okxSource = pendingSource(
-  "okx_p2p",
-  "OKX P2P",
-  "https://www.okx.com/p2p-markets",
-  "Requiere credenciales de API.",
-);
+export const okxSource: P2PSource = {
+  key: "okx_p2p",
+  name: "OKX P2P",
+  isReal: true,
+  website: "https://www.okx.com/p2p-markets",
+  async fetchOffers(params: SearchParams): Promise<SourceResult> {
+    try {
+      // En OKX el libros "sell" agrupa a quien vende crypto (el usuario compra) y
+      // "buy" a quien compra crypto (el usuario vende).
+      const okxSide = params.side === "buy" ? "sell" : "buy";
+      const query = new URLSearchParams({
+        side: okxSide,
+        quoteCurrency: params.fiat,
+        baseCurrency: params.asset.toLowerCase(),
+        paymentMethod: okxPaymentMethod(params.paymentMethod),
+        userType: "all",
+        showTrade: "false",
+        px: "null",
+        orderBy: "price_desc",
+        t: String(Date.now()),
+      });
+      const res = await fetch(
+        `https://www.okx.com/v3/c2c/tradingOrders/books?${query.toString()}`,
+        {
+          headers: {
+            accept: "application/json",
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36",
+          },
+          signal: AbortSignal.timeout(12000),
+        },
+      );
+
+      if (!res.ok) {
+        return {
+          offers: [],
+          status: "unavailable",
+          message: `OKX P2P respondió ${res.status}`,
+        };
+      }
+
+      const json = (await res.json()) as { code?: number; data?: Record<string, OkxAd[]> };
+      const rows = Array.isArray(json.data?.[okxSide]) ? json.data![okxSide]! : [];
+      const limit = Math.min(20, Math.max(params.limit, 10));
+      const now = new Date().toISOString();
+      const marketUrl = `https://www.okx.com/p2p-markets/${params.asset.toLowerCase()}-${params.fiat.toLowerCase()}`;
+
+      const offers: RawOffer[] = rows.slice(0, limit).map((row) => ({
+        provider: "okx_p2p",
+        providerName: "OKX P2P",
+        asset: params.asset,
+        fiat: params.fiat,
+        side: params.side,
+        price: Number(row.price ?? 0),
+        amountMin: row.quoteMinAmountPerOrder ? Number(row.quoteMinAmountPerOrder) : null,
+        amountMax: row.quoteMaxAmountPerOrder ? Number(row.quoteMaxAmountPerOrder) : null,
+        paymentMethod: row.paymentMethods?.[0] ?? null,
+        location: null,
+        counterparty: row.nickName ?? null,
+        sourceUrl: marketUrl,
+        timestamp: now,
+        dataMode: "real",
+      }));
+
+      const valid = offers.filter((o) => o.price > 0);
+      if (valid.length === 0) {
+        return { offers: [], status: "available", message: "Sin anuncios para estos filtros." };
+      }
+      return { offers: valid, status: "available" };
+    } catch (error) {
+      return {
+        offers: [],
+        status: "unavailable",
+        message: error instanceof Error ? error.message : "Fuente no disponible",
+      };
+    }
+  },
+};
 export const hodlHodlSource = pendingSource(
   "hodlhodl",
   "Hodl Hodl",
@@ -186,6 +258,27 @@ export const peachSource = pendingSource(
   "https://peachbitcoin.com",
   "Sin API pública estable.",
 );
+
+interface OkxAd {
+  price?: string;
+  quoteMinAmountPerOrder?: string;
+  quoteMaxAmountPerOrder?: string;
+  paymentMethods?: string[];
+  nickName?: string;
+}
+
+const OKX_PAYMENT_METHODS: Record<string, string> = {
+  "Transferencia bancaria": "bank",
+  Bizum: "Bizum",
+  "SEPA instantáneo": "SEPA Instant",
+  Revolut: "Revolut",
+  Wise: "Wise",
+};
+
+function okxPaymentMethod(paymentMethod: string | null | undefined): string {
+  if (!paymentMethod) return "all";
+  return OKX_PAYMENT_METHODS[paymentMethod] ?? "all";
+}
 
 /** Fuente DEMO: datos sintéticos, siempre etiquetados como demo. */
 export const demoSource: P2PSource = {

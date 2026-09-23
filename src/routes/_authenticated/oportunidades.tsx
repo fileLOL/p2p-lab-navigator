@@ -417,7 +417,7 @@ function OpportunityCard({
             </Button>
             {opportunity.source_url ? (
               <Button variant="outline" onClick={onOpenProvider} className="flex-1 sm:flex-none">
-                Ir a Binance <ExternalLink className="size-4" />
+                Ver oferta <ExternalLink className="size-4" />
               </Button>
             ) : null}
           </>

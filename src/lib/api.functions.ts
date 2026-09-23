@@ -252,7 +252,7 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       };
     }
 
-    const { binanceP2PSource, demoSource } = await import("@/lib/p2p/sources.server");
+    const { binanceP2PSource, okxSource, demoSource } = await import("@/lib/p2p/sources.server");
     const { fetchReferencePrice } = await import("@/lib/p2p/prices.server");
     const { normalizeOffers } = await import("@/lib/p2p/engine");
 
@@ -266,21 +266,20 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       limit: MAX_RESULTS_PER_SEARCH,
     };
 
-    const [reference, realResult] = await Promise.all([
+    const realSources = [binanceP2PSource, okxSource];
+    const [reference, ...realResults] = await Promise.all([
       fetchReferencePrice(data.asset, data.fiat),
-      binanceP2PSource.fetchOffers(params),
+      ...realSources.map((source) => source.fetchOffers(params)),
     ]);
 
-    const sourceStatus = [
-      {
-        key: binanceP2PSource.key,
-        name: binanceP2PSource.name,
-        status: realResult.status,
-        message: realResult.message,
-      },
-    ];
+    const sourceStatus = realSources.map((source, i) => ({
+      key: source.key,
+      name: source.name,
+      status: realResults[i]!.status,
+      message: realResults[i]!.message,
+    }));
 
-    let offers = realResult.offers;
+    let offers = realResults.flatMap((result) => result.offers);
     let dataMode: "real" | "demo" = "real";
     if (offers.length === 0 && data.allowDemo) {
       const demo = await demoSource.fetchOffers(params);
