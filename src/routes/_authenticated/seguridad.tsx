@@ -162,6 +162,7 @@ function actionLabel(action: string) {
     search: "Búsqueda de oportunidades",
     paper_buy: "Compra simulada",
     paper_sell: "Venta simulada",
+    real_trade_create: "Registro de operación real",
     plan_change: "Cambio de plan",
     profile_update: "Actualización de perfil",
     account_deletion: "Eliminación de cuenta",

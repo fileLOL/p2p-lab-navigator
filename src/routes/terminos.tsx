@@ -70,11 +70,10 @@ function TerminosPage() {
               <p>
                 P2P Lab es una herramienta de análisis de diferenciales de precios en mercados P2P
                 de criptomonedas, de simulación de operaciones (paper trading) con capital virtual,
-                y un terminal desde el que puedes lanzar operaciones sobre tu propia cuenta de un
-                exchange (actualmente Binance) conectándola con tus claves API. No es un exchange,
-                no custodia fondos, no ejecuta operaciones por cuenta propia ni en tu nombre de
-                forma discrecional, y no ofrece asesoramiento financiero, de inversión, legal ni
-                fiscal.
+                y de registro de operaciones reales que ejecutas por tu cuenta en un proveedor P2P
+                (actualmente Binance). No es un exchange, no custodia fondos, no ejecuta operaciones
+                por cuenta propia ni en tu nombre de forma discrecional, y no ofrece asesoramiento
+                financiero, de inversión, legal ni fiscal.
               </p>
               <p>
                 Los datos de mercado proceden de fuentes públicas (etiquetadas como REALES) o de
@@ -83,19 +82,20 @@ function TerminosPage() {
               </p>
             </Section>
 
-            <Section title="2 bis. Trading real con tu cuenta de exchange">
+            <Section title="2 bis. Trading real">
               <p>
-                Si conectas tu cuenta de un exchange mediante claves API, las operaciones se
-                ejecutan siempre en tu propia cuenta, con tus fondos y bajo tu exclusiva
-                responsabilidad. P2P Lab actúa únicamente como software que transmite las órdenes
-                que tú confirmas expresamente; nunca custodia tus fondos ni puede retirarlos (las
-                claves deben crearse sin permiso de retirada).
+                Las operaciones reales se ejecutan siempre fuera de P2P Lab, en tu propia cuenta de
+                un proveedor P2P (actualmente Binance), con tus fondos y bajo tu exclusiva
+                responsabilidad. La app te muestra ofertas reales y enlaces directos a la
+                plataforma, donde compras o vendes directamente con otra persona y con el depósito
+                en garantía de esa plataforma.
               </p>
               <p>
-                Tus claves se almacenan cifradas y solo se usan para ejecutar lo que tú confirmas.
-                Puedes desconectar el exchange en cualquier momento, lo que elimina las claves de
-                nuestros sistemas. Las pérdidas derivadas de tus operaciones, de errores de
-                configuración de tus claves o de fallos del exchange son responsabilidad tuya.
+                P2P Lab solo registra, a petición tuya, las operaciones que declaras haber
+                ejecutado, para que lleves tu histórico separado de las simulaciones. No custodiamos
+                tus fondos ni tus criptomonedas. Las pérdidas derivadas de tus operaciones, errores
+                de la contraparte o fallos de la plataforma del proveedor, así como las
+                implicaciones fiscales, son responsabilidad tuya.
               </p>
             </Section>
 

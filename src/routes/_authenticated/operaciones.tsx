@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { History, Loader2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -157,6 +157,11 @@ function RealTradesSection() {
           icon={<History className="size-6 text-muted-foreground" />}
           title="Todavía no hay operaciones reales registradas"
           description="Pulsa «Registrar operación real» o guárdala desde una oportunidad con la opción «Registrar ejecutada»."
+          action={
+            <Button asChild size="sm" variant="outline">
+              <Link to="/trading-real">Ver cómo operar en el proveedor</Link>
+            </Button>
+          }
         />
       ) : (
         <>
@@ -259,16 +264,19 @@ function EmptyHistory({
   icon,
   title,
   description,
+  action,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
+  action?: React.ReactNode;
 }) {
   return (
     <div className="surface-card flex flex-col items-center gap-2 p-10 text-center">
       {icon}
       <p className="font-medium">{title}</p>
       <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
+      {action}
     </div>
   );
 }

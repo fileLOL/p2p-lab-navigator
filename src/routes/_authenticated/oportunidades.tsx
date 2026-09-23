@@ -7,10 +7,12 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { DataModeBadge } from "@/components/DataModeBadge";
+import { ProviderLeaveDialog } from "@/components/ProviderLeaveDialog";
 import { QuotaCard } from "@/components/QuotaCard";
 import { RealTradeDialog, type RealTradeTarget } from "@/components/RealTradeDialog";
 import { SimulateDialog, type SimulationTarget } from "@/components/SimulateDialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,6 +26,7 @@ import { useOverview } from "@/hooks/useOverview";
 import { searchOpportunities, type OpportunityDTO, type QuotaState } from "@/lib/api.functions";
 import { formatMoney, formatPct } from "@/lib/accounting";
 import { ASSETS, FIATS, PAYMENT_METHODS, SPREAD_DISCLAIMER } from "@/lib/config";
+import { isProviderLeaveDismissed, openProviderUrl } from "@/lib/providerLeaving";
 
 export const Route = createFileRoute("/_authenticated/oportunidades")({
   head: () => ({
@@ -51,6 +54,7 @@ function OpportunitiesPage() {
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("all");
+  const [onlyReal, setOnlyReal] = useState(false);
 
   const [results, setResults] = useState<OpportunityDTO[] | null>(null);
   const [quota, setQuota] = useState<QuotaState | null>(null);
@@ -62,6 +66,8 @@ function OpportunitiesPage() {
   const [realTarget, setRealTarget] = useState<RealTradeTarget | null>(null);
   const [realDialogOpen, setRealDialogOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [leaveUrl, setLeaveUrl] = useState<string | null>(null);
+  const [leaveProvider, setLeaveProvider] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: async () =>
@@ -73,7 +79,7 @@ function OpportunitiesPage() {
           amount: amount ? Number(amount) : null,
           paymentMethod: paymentMethod === "all" ? null : paymentMethod,
           location: null,
-          allowDemo: true,
+          allowDemo: !onlyReal,
         },
       }),
     onSuccess: (result) => {
@@ -143,6 +149,16 @@ function OpportunitiesPage() {
     } catch {
       toast.error("No se pudo copiar la oferta.");
     }
+  };
+
+  const openProvider = (opportunity: OpportunityDTO) => {
+    if (!opportunity.source_url) return;
+    if (isProviderLeaveDismissed()) {
+      openProviderUrl(opportunity.source_url);
+      return;
+    }
+    setLeaveProvider(opportunity.provider_name);
+    setLeaveUrl(opportunity.source_url);
   };
 
   return (
@@ -224,6 +240,12 @@ function OpportunitiesPage() {
             {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
             Buscar oportunidades
           </Button>
+          <label className="mt-3 flex w-fit cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+            <Checkbox checked={onlyReal} onCheckedChange={(v) => setOnlyReal(v === true)} />
+            <span>
+              Solo ofertas reales <span className="text-xs">(oculta las de demostración)</span>
+            </span>
+          </label>
           <p className="mt-2 text-xs text-muted-foreground">
             Cada búsqueda consume una unidad de tu cuota y devuelve hasta 10 oportunidades. Las
             simulaciones son ilimitadas.
@@ -275,6 +297,7 @@ function OpportunitiesPage() {
                 onSimulate={() => openSimulation(o)}
                 onRegister={() => openRealRegister(o)}
                 onCopy={() => copyOpportunity(o)}
+                onOpenProvider={() => openProvider(o)}
               />
             ))}
           </div>
@@ -290,6 +313,14 @@ function OpportunitiesPage() {
 
       <SimulateDialog target={target} open={dialogOpen} onOpenChange={setDialogOpen} />
       <RealTradeDialog target={realTarget} open={realDialogOpen} onOpenChange={setRealDialogOpen} />
+      <ProviderLeaveDialog
+        open={leaveUrl !== null}
+        onOpenChange={(open) => {
+          if (!open) setLeaveUrl(null);
+        }}
+        url={leaveUrl ?? ""}
+        providerName={leaveProvider ?? "el proveedor"}
+      />
     </AppShell>
   );
 }
@@ -315,12 +346,14 @@ function OpportunityCard({
   onSimulate,
   onRegister,
   onCopy,
+  onOpenProvider,
 }: {
   opportunity: OpportunityDTO;
   copied: boolean;
   onSimulate: () => void;
   onRegister: () => void;
   onCopy: () => void;
+  onOpenProvider: () => void;
 }) {
   const digits = opportunity.price < 10 ? 4 : 2;
   return (
@@ -383,10 +416,8 @@ function OpportunityCard({
               Registrar ejecutada
             </Button>
             {opportunity.source_url ? (
-              <Button asChild variant="outline" className="flex-1 sm:flex-none">
-                <a href={opportunity.source_url} target="_blank" rel="noopener noreferrer">
-                  Obrir a Binance <ExternalLink className="size-4" />
-                </a>
+              <Button variant="outline" onClick={onOpenProvider} className="flex-1 sm:flex-none">
+                Ir a Binance <ExternalLink className="size-4" />
               </Button>
             ) : null}
           </>
