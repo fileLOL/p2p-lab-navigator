@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export const OAUTH_REDIRECT_KEY = "p2plab:oauth-redirect";
@@ -16,16 +16,18 @@ export function GoogleSignInButton({ redirectTo }: { redirectTo: string }) {
     } catch {
       // sessionStorage puede no estar disponible; el destino por defecto sigue funcionando
     }
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/oauth-callback`,
+    const { error, data } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/oauth-callback`,
+      },
     });
-    if (result.error) {
+    if (error) {
       setLoading(false);
       toast.error("No se ha podido iniciar sesión con Google.");
       return;
     }
-    if (result.redirected) return;
-    window.location.assign("/oauth-callback");
+    if (data.url) void window.location.assign(data.url);
   };
 
   return (
