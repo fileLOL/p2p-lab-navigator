@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ export interface RealTradeTarget {
   counterparty?: string | null;
   amountMin?: number | null;
   amountMax?: number | null;
+  availableQuantity?: number | null;
 }
 
 export function RealTradeDialog({
@@ -47,6 +48,7 @@ export function RealTradeDialog({
   const [counterparty, setCounterparty] = useState("");
   const [executedAt, setExecutedAt] = useState("");
   const createFn = useServerFn(createRealTrade);
+  const qc = useQueryClient();
 
   const reset = () => {
     setAmount("");
@@ -87,6 +89,7 @@ export function RealTradeDialog({
     },
     onSuccess: () => {
       toast.success(target?.side === "buy" ? "Compra real registrada." : "Venta real registrada.");
+      void qc.invalidateQueries({ queryKey: ["real-overview"] });
       onSaved?.();
       reset();
       onOpenChange(false);
@@ -141,6 +144,15 @@ export function RealTradeDialog({
             {target.amountMin || target.amountMax ? (
               <p className="text-xs text-muted-foreground">
                 Rango del anuncio: {target.amountMin ?? 0} – {target.amountMax ?? "∞"} {target.fiat}
+              </p>
+            ) : null}
+            {!isBuy &&
+            target.availableQuantity != null &&
+            quantity > target.availableQuantity + 1e-12 ? (
+              <p className="text-xs text-warning-foreground">
+                Aviso: registras vender más de lo que tienes registrado (
+                {formatQty(target.availableQuantity)} {target.asset}). Solo se calculará el
+                resultado sobre la parte registrada.
               </p>
             ) : null}
           </div>
