@@ -681,3 +681,92 @@ export const getSources = createServerFn({ method: "GET" }).handler(async () => 
     website: s.website ?? null,
   }));
 });
+
+// ---------- Seguimiento real ----------
+
+export interface RealOverviewDTO {
+  positions: {
+    asset: string;
+    fiat: string;
+    quantity: number;
+    avg_cost: number;
+    price: number | null;
+    value: number | null;
+    unrealized_pnl: number | null;
+    realized_pnl: number;
+  }[];
+  trades: (RealTradeDTO & { realized_pnl: number; oversold: boolean })[];
+  metrics: {
+    invested_cost: number;
+    positions_value: number;
+    realized_pnl: number;
+    unrealized_pnl: number;
+    total_pnl: number;
+    missing_prices: boolean;
+  };
+}
+
+export const getRealOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<RealOverviewDTO> => {
+    const { computeRealLedger } = await import("@/lib/accounting");
+    const { fetchReferencePrice } = await import("@/lib/p2p/prices.server");
+    const { data: rows, error } = await context.supabase
+      .from("real_trades")
+      .select("*")
+      .eq("user_id", context.userId)
+      .order("executed_at", { ascending: true })
+      .limit(2000);
+    if (error) throw new Error(error.message);
+    const trades = (rows ?? []).map((r) => mapRealTrade(r as Record<string, unknown>));
+    const ledger = computeRealLedger(
+      trades.map((t) => ({
+        id: t.id,
+        asset: t.asset,
+        fiat: t.fiat,
+        side: t.side,
+        quantity: t.quantity,
+        price: t.price,
+        fees: t.fees,
+        executedAt: t.executed_at,
+      })),
+    );
+    const positions = await Promise.all(
+      ledger.positions.map(async (p) => {
+        const ref = p.quantity > 0 ? await fetchReferencePrice(p.asset, p.fiat) : null;
+        const price = ref?.price ?? null;
+        const value = price === null ? null : price * p.quantity;
+        return {
+          asset: p.asset,
+          fiat: p.fiat,
+          quantity: p.quantity,
+          avg_cost: p.avgCost,
+          price,
+          value,
+          unrealized_pnl: value === null ? null : value - p.quantity * p.avgCost,
+          realized_pnl: p.realizedPnl,
+        };
+      }),
+    );
+    const open = positions.filter((p) => p.quantity > 0);
+    const realized = positions.reduce((a, p) => a + p.realized_pnl, 0);
+    const unrealized = open.reduce((a, p) => a + (p.unrealized_pnl ?? 0), 0);
+    return {
+      positions,
+      trades: trades
+        .map((t) => ({
+          ...t,
+          realized_pnl: ledger.tradePnl[t.id] ?? 0,
+          oversold: ledger.oversold.includes(t.id),
+        }))
+        .reverse(),
+      metrics: {
+        invested_cost: open.reduce((a, p) => a + p.quantity * p.avg_cost, 0),
+        positions_value: open.reduce((a, p) => a + (p.value ?? 0), 0),
+        realized_pnl: realized,
+        unrealized_pnl: unrealized,
+        total_pnl: realized + unrealized,
+        missing_prices: open.some((p) => p.price === null),
+      },
+    };
+  });

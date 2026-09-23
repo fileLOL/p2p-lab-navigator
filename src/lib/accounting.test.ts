@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { computePortfolio, computeTradeStats, quoteBuy, quoteSell } from "./accounting";
+import {
+  computePortfolio,
+  computeRealLedger,
+  computeTradeStats,
+  quoteBuy,
+  quoteSell,
+} from "./accounting";
 
 describe("computePortfolio", () => {
   it("empieza con 25.000 € de capital y ROI 0", () => {
@@ -92,7 +98,6 @@ describe("computeTradeStats", () => {
   });
 });
 
-import { computeRealLedger } from "./accounting";
 
 describe("computeRealLedger", () => {
   it("calcula coste medio, venta parcial y comisiones", () => {
