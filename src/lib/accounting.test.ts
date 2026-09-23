@@ -91,3 +91,26 @@ describe("computeTradeStats", () => {
     expect(stats.bestTrade).toBeNull();
   });
 });
+
+import { computeRealLedger } from "./accounting";
+
+describe("computeRealLedger", () => {
+  it("calcula coste medio, venta parcial y comisiones", () => {
+    const l = computeRealLedger([
+      { id: "a", asset: "BTC", fiat: "EUR", side: "buy", quantity: 1, price: 100, fees: 2, executedAt: "2026-01-01" },
+      { id: "b", asset: "BTC", fiat: "EUR", side: "buy", quantity: 1, price: 200, fees: 0, executedAt: "2026-01-02" },
+      { id: "c", asset: "BTC", fiat: "EUR", side: "sell", quantity: 1, price: 300, fees: 1, executedAt: "2026-01-03" },
+    ]);
+    const p = l.positions[0]!;
+    expect(p.quantity).toBe(1);
+    expect(p.avgCost).toBeCloseTo(151);
+    expect(l.tradePnl["c"]).toBeCloseTo(148);
+    expect(l.oversold).toEqual([]);
+  });
+  it("marca ventas sin saldo registrado", () => {
+    const l = computeRealLedger([
+      { id: "x", asset: "ETH", fiat: "EUR", side: "sell", quantity: 1, price: 10, fees: 0, executedAt: "2026-01-01" },
+    ]);
+    expect(l.oversold).toEqual(["x"]);
+  });
+});

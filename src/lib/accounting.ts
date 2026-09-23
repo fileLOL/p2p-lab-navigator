@@ -161,3 +161,64 @@ export function formatQty(value: number): string {
   const digits = value < 1 ? 8 : 6;
   return value.toFixed(digits).replace(/0+$/, "").replace(/\.$/, "");
 }
+
+// ---------- Operaciones reales (registradas por el usuario) ----------
+
+export interface RealTradeInput {
+  id: string;
+  asset: string;
+  fiat: string;
+  side: "buy" | "sell";
+  quantity: number;
+  price: number;
+  fees: number;
+  executedAt: string;
+}
+
+export interface RealPosition {
+  asset: string;
+  fiat: string;
+  quantity: number;
+  avgCost: number;
+  realizedPnl: number;
+}
+
+export interface RealLedger {
+  positions: RealPosition[];
+  /** Beneficio realizado de cada venta, por id de operación. */
+  tradePnl: Record<string, number>;
+  /** Ventas que superan la cantidad registrada (saldo anterior a la app). */
+  oversold: string[];
+}
+
+/** Coste medio ponderado por activo y moneda. Las comisiones suman al coste o restan a la venta. */
+export function computeRealLedger(trades: RealTradeInput[]): RealLedger {
+  const sorted = [...trades].sort((a, b) => a.executedAt.localeCompare(b.executedAt));
+  const map = new Map<string, RealPosition>();
+  const tradePnl: Record<string, number> = {};
+  const oversold: string[] = [];
+  for (const t of sorted) {
+    const key = `${t.asset}|${t.fiat}`;
+    const pos = map.get(key) ?? { asset: t.asset, fiat: t.fiat, quantity: 0, avgCost: 0, realizedPnl: 0 };
+    if (t.side === "buy") {
+      const cost = pos.quantity * pos.avgCost + t.quantity * t.price + t.fees;
+      pos.quantity += t.quantity;
+      pos.avgCost = pos.quantity > 0 ? cost / pos.quantity : 0;
+      tradePnl[t.id] = 0;
+    } else {
+      const covered = Math.min(t.quantity, pos.quantity);
+      if (t.quantity > pos.quantity + 1e-12) oversold.push(t.id);
+      const proceeds = covered * t.price - t.fees * (t.quantity > 0 ? covered / t.quantity : 0);
+      const pnl = proceeds - covered * pos.avgCost;
+      pos.realizedPnl += pnl;
+      pos.quantity -= covered;
+      if (pos.quantity <= 1e-12) {
+        pos.quantity = 0;
+        pos.avgCost = 0;
+      }
+      tradePnl[t.id] = pnl;
+    }
+    map.set(key, pos);
+  }
+  return { positions: [...map.values()], tradePnl, oversold };
+}
