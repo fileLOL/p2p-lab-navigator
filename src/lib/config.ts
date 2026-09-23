@@ -80,6 +80,7 @@ export const PAYMENT_METHODS = [
   "Wise",
   "Efectivo",
 ] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const SPREAD_DISCLAIMER =
   "El diferencial mostrado no es necesariamente el beneficio final. Las comisiones, liquidez, límites, tiempos y otros costes pueden modificar el resultado.";

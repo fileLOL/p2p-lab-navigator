@@ -343,6 +343,65 @@ export type Database = {
         };
         Relationships: [];
       };
+      real_trades: {
+        Row: {
+          asset: string;
+          counterparty: string | null;
+          created_at: string;
+          executed_at: string;
+          fees: number;
+          fiat: string;
+          id: string;
+          opportunity_id: string | null;
+          price: number;
+          provider: string | null;
+          quantity: number;
+          side: string;
+          total: number;
+          user_id: string;
+        };
+        Insert: {
+          asset: string;
+          counterparty?: string | null;
+          created_at?: string;
+          executed_at?: string;
+          fees?: number;
+          fiat?: string;
+          id?: string;
+          opportunity_id?: string | null;
+          price: number;
+          provider?: string | null;
+          quantity: number;
+          side: string;
+          total: number;
+          user_id: string;
+        };
+        Update: {
+          asset?: string;
+          counterparty?: string | null;
+          created_at?: string;
+          executed_at?: string;
+          fees?: number;
+          fiat?: string;
+          id?: string;
+          opportunity_id?: string | null;
+          price?: number;
+          provider?: string | null;
+          quantity?: number;
+          side?: string;
+          total?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "real_trades_opportunity_id_fkey";
+            columns: ["opportunity_id"];
+            isOneToOne: false;
+            referencedRelation: "opportunities";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       search_usage: {
         Row: {
           id: string;

@@ -72,6 +72,22 @@ export interface TradeDTO {
   created_at: string;
 }
 
+export interface RealTradeDTO {
+  id: string;
+  asset: string;
+  fiat: string;
+  side: "buy" | "sell";
+  quantity: number;
+  price: number;
+  total: number;
+  fees: number;
+  provider: string | null;
+  counterparty: string | null;
+  opportunity_id: string | null;
+  executed_at: string;
+  created_at: string;
+}
+
 const numeric = (value: unknown): number => Number(value ?? 0);
 
 // ---------- Dashboard / cartera ----------
@@ -369,6 +385,148 @@ export const getLastOpportunities = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (data ?? []).map((row) => mapOpportunity(row as Record<string, unknown>));
   });
+
+// ---------- Registro de operaciones reales ----------
+
+const realTradeSchema = z.object({
+  asset: z.string().min(2).max(10),
+  fiat: z.string().min(3).max(4).default("EUR"),
+  side: z.enum(["buy", "sell"]),
+  quantity: z.number().positive(),
+  price: z.number().positive(),
+  fees: z.number().min(0).default(0),
+  provider: z.string().max(80).nullable().optional(),
+  counterparty: z.string().max(120).nullable().optional(),
+  opportunityId: z.string().uuid().nullable().optional(),
+  executedAt: z.string().nullable().optional(),
+});
+
+export const listRealTrades = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { page?: number; pageSize?: number }) =>
+    z
+      .object({
+        page: z.number().int().min(0).default(0),
+        pageSize: z.number().int().min(1).max(50).default(10),
+      })
+      .parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const from = data.page * data.pageSize;
+    const {
+      data: rows,
+      count,
+      error,
+    } = await context.supabase
+      .from("real_trades")
+      .select("*", { count: "exact" })
+      .eq("user_id", context.userId)
+      .order("executed_at", { ascending: false })
+      .range(from, from + data.pageSize - 1);
+    if (error) throw new Error(error.message);
+    return {
+      trades: (rows ?? []).map((t) => mapRealTrade(t as Record<string, unknown>)),
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
+  });
+
+export const createRealTrade = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => realTradeSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    if (data.opportunityId) {
+      const { data: opp, error: oppError } = await supabase
+        .from("opportunities")
+        .select("id")
+        .eq("id", data.opportunityId)
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (oppError) throw new Error(oppError.message);
+      if (!opp) throw new Error("La oportunidad no es válida o ha caducado.");
+    }
+
+    const total = data.price * data.quantity + data.fees;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: inserted, error } = await supabaseAdmin
+      .from("real_trades")
+      .insert({
+        user_id: userId,
+        asset: data.asset,
+        fiat: data.fiat,
+        side: data.side,
+        quantity: data.quantity,
+        price: data.price,
+        total,
+        fees: data.fees,
+        provider: data.provider ?? null,
+        counterparty: data.counterparty ?? null,
+        opportunity_id: data.opportunityId ?? null,
+        executed_at: data.executedAt
+          ? new Date(data.executedAt).toISOString()
+          : new Date().toISOString(),
+      })
+      .select("*")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!inserted) throw new Error("No se pudo registrar la operación.");
+
+    await supabase.rpc("log_action", {
+      _action: "real_trade_create",
+      _metadata: {
+        asset: data.asset,
+        side: data.side,
+        quantity: data.quantity,
+        price: data.price,
+      },
+    });
+
+    return { trade: mapRealTrade(inserted as Record<string, unknown>) };
+  });
+
+export const deleteRealTrade = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: existing } = await supabase
+      .from("real_trades")
+      .select("id")
+      .eq("id", data.id)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!existing) throw new Error("La operación no existe o no te pertenece.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("real_trades")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+function mapRealTrade(row: Record<string, unknown>): RealTradeDTO {
+  return {
+    id: String(row["id"]),
+    asset: String(row["asset"]),
+    fiat: String(row["fiat"] ?? "EUR"),
+    side: row["side"] === "sell" ? "sell" : "buy",
+    quantity: numeric(row["quantity"]),
+    price: numeric(row["price"]),
+    total: numeric(row["total"]),
+    fees: numeric(row["fees"]),
+    provider: (row["provider"] as string | null) ?? null,
+    counterparty: (row["counterparty"] as string | null) ?? null,
+    opportunity_id: (row["opportunity_id"] as string | null) ?? null,
+    executed_at: String(row["executed_at"]),
+    created_at: String(row["created_at"]),
+  };
+}
 
 // ---------- Paper trading ----------
 

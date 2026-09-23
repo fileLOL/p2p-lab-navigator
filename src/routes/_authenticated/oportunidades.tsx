@@ -1,13 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink, Loader2, SearchX } from "lucide-react";
+import { Check, Clipboard, ExternalLink, Loader2, SearchX } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { DataModeBadge } from "@/components/DataModeBadge";
 import { QuotaCard } from "@/components/QuotaCard";
+import { RealTradeDialog, type RealTradeTarget } from "@/components/RealTradeDialog";
 import { SimulateDialog, type SimulationTarget } from "@/components/SimulateDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,9 @@ function OpportunitiesPage() {
   >([]);
   const [target, setTarget] = useState<SimulationTarget | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [realTarget, setRealTarget] = useState<RealTradeTarget | null>(null);
+  const [realDialogOpen, setRealDialogOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: async () =>
@@ -105,6 +109,40 @@ function OpportunitiesPage() {
         overview?.positions.find((p) => p.asset === opportunity.asset)?.quantity ?? 0,
     });
     setDialogOpen(true);
+  };
+
+  const openRealRegister = (opportunity: OpportunityDTO) => {
+    setRealTarget({
+      asset: opportunity.asset,
+      fiat: opportunity.fiat,
+      side: opportunity.side,
+      price: opportunity.price,
+      opportunityId: opportunity.id,
+      providerName: opportunity.provider_name,
+      counterparty: opportunity.counterparty,
+      amountMin: opportunity.amount_min,
+      amountMax: opportunity.amount_max,
+    });
+    setRealDialogOpen(true);
+  };
+
+  const copyOpportunity = async (opportunity: OpportunityDTO) => {
+    const digits = opportunity.price < 10 ? 4 : 2;
+    const summary = [
+      opportunity.counterparty ? `Contraparte: ${opportunity.counterparty}` : null,
+      `${opportunity.side === "buy" ? "Comprar" : "Vender"} ${opportunity.asset} a ${formatMoney(opportunity.price, opportunity.fiat, digits)}`,
+      opportunity.payment_method ? `Método: ${opportunity.payment_method}` : null,
+      opportunity.source_url ? `Enlace: ${opportunity.source_url}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopiedId(opportunity.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      toast.error("No se pudo copiar la oferta.");
+    }
   };
 
   return (
@@ -230,7 +268,14 @@ function OpportunitiesPage() {
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
             {results.map((o) => (
-              <OpportunityCard key={o.id} opportunity={o} onSimulate={() => openSimulation(o)} />
+              <OpportunityCard
+                key={o.id}
+                opportunity={o}
+                copied={copiedId === o.id}
+                onSimulate={() => openSimulation(o)}
+                onRegister={() => openRealRegister(o)}
+                onCopy={() => copyOpportunity(o)}
+              />
             ))}
           </div>
         )}
@@ -244,6 +289,7 @@ function OpportunitiesPage() {
       </div>
 
       <SimulateDialog target={target} open={dialogOpen} onOpenChange={setDialogOpen} />
+      <RealTradeDialog target={realTarget} open={realDialogOpen} onOpenChange={setRealDialogOpen} />
     </AppShell>
   );
 }
@@ -265,10 +311,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function OpportunityCard({
   opportunity,
+  copied,
   onSimulate,
+  onRegister,
+  onCopy,
 }: {
   opportunity: OpportunityDTO;
+  copied: boolean;
   onSimulate: () => void;
+  onRegister: () => void;
+  onCopy: () => void;
 }) {
   const digits = opportunity.price < 10 ? 4 : 2;
   return (
@@ -321,12 +373,23 @@ function OpportunityCard({
         <Button onClick={onSimulate} className="flex-1 sm:flex-none">
           Simular
         </Button>
-        {opportunity.data_mode === "real" && opportunity.source_url ? (
-          <Button asChild variant="outline" className="flex-1 sm:flex-none">
-            <a href={opportunity.source_url} target="_blank" rel="noopener noreferrer">
-              Continuar al proveedor <ExternalLink className="size-4" />
-            </a>
-          </Button>
+        {opportunity.data_mode === "real" ? (
+          <>
+            <Button variant="outline" onClick={onCopy} className="flex-1 sm:flex-none">
+              {copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}
+              {copied ? "Copiada" : "Copiar oferta"}
+            </Button>
+            <Button variant="outline" onClick={onRegister} className="flex-1 sm:flex-none">
+              Registrar ejecutada
+            </Button>
+            {opportunity.source_url ? (
+              <Button asChild variant="outline" className="flex-1 sm:flex-none">
+                <a href={opportunity.source_url} target="_blank" rel="noopener noreferrer">
+                  Obrir a Binance <ExternalLink className="size-4" />
+                </a>
+              </Button>
+            ) : null}
+          </>
         ) : (
           <span className="self-center text-xs text-muted-foreground">
             Oportunidad demo: no hay proveedor real.

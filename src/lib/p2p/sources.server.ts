@@ -1,4 +1,37 @@
-import type { P2PSource, RawOffer, SearchParams, SourceResult } from "./types";
+import type { P2PSource, RawOffer, SearchParams, Side, SourceResult } from "./types";
+
+/**
+ * Identificadores de método de pago que entiende la API y las URLs de Binance P2P.
+ * Un per-aprovar: los nombres amigables (config.ts) no coinciden con los códigos Binance.
+ */
+export const PAYMENT_METHOD_IDENTIFIERS: Record<string, string> = {
+  "Transferencia bancaria": "BANK",
+  Bizum: "BIZUM",
+  "SEPA instantáneo": "SEPAINSTANT",
+  Revolut: "Revolut",
+  Wise: "Wise",
+  Efectivo: "CASH",
+};
+
+function binanceIdentifier(paymentMethod: string | null | undefined): string | null {
+  if (!paymentMethod) return null;
+  return PAYMENT_METHOD_IDENTIFIERS[paymentMethod] ?? null;
+}
+
+/** Genera el enlace del mercado P2P de Binance pre-filtrado por operación y método. */
+export function buildBinanceTradeUrl(
+  side: Side,
+  asset: string,
+  fiat: string,
+  paymentMethod: string | null | undefined = null,
+): string {
+  const direction = side === "buy" ? "buy" : "sell";
+  const method = binanceIdentifier(paymentMethod);
+  const path = method
+    ? `${method}/${encodeURIComponent(asset)}`
+    : `${direction}/${encodeURIComponent(asset)}/`;
+  return `https://p2p.binance.com/en/trade/${path}?fiat=${encodeURIComponent(fiat)}`;
+}
 
 /** Adaptador real: Binance P2P (endpoint público, sin credenciales). */
 export const binanceP2PSource: P2PSource = {
@@ -8,6 +41,7 @@ export const binanceP2PSource: P2PSource = {
   website: "https://p2p.binance.com",
   async fetchOffers(params: SearchParams): Promise<SourceResult> {
     try {
+      const methodIdentifier = binanceIdentifier(params.paymentMethod);
       const res = await fetch("https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search", {
         method: "POST",
         headers: { "content-type": "application/json", accept: "application/json" },
@@ -18,7 +52,7 @@ export const binanceP2PSource: P2PSource = {
           fiat: params.fiat,
           // En Binance "BUY" lista anuncios donde el usuario compra cripto.
           tradeType: params.side === "buy" ? "BUY" : "SELL",
-          payTypes: params.paymentMethod ? [params.paymentMethod] : [],
+          payTypes: methodIdentifier ? [methodIdentifier] : [],
           countries: [],
           transAmount: params.amount ? String(params.amount) : "",
         }),
@@ -49,7 +83,12 @@ export const binanceP2PSource: P2PSource = {
         paymentMethod: row.adv?.tradeMethods?.[0]?.tradeMethodName ?? null,
         location: row.advertiser?.nickName ? null : null,
         counterparty: row.advertiser?.nickName ?? null,
-        sourceUrl: "https://p2p.binance.com/es/trade",
+        sourceUrl: buildBinanceTradeUrl(
+          params.side,
+          row.adv?.asset ?? params.asset,
+          row.adv?.fiatUnit ?? params.fiat,
+          row.adv?.tradeMethods?.[0]?.tradeMethodName ?? params.paymentMethod,
+        ),
         timestamp: now,
         dataMode: "real",
       }));
