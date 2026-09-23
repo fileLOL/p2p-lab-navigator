@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { MAX_RESULTS_PER_SEARCH } from "@/lib/config";
+import { entitlementEnvironment } from "@/lib/stripe";
 
 // ---------- Tipos compartidos con la UI ----------
 
@@ -100,7 +101,7 @@ export const getOverview = createServerFn({ method: "GET" })
     const [{ data: metricsRaw, error: metricsError }, { data: quotaRaw }, { data: profile }] =
       await Promise.all([
         supabase.rpc("refresh_equity"),
-        supabase.rpc("get_quota"),
+        supabase.rpc("get_quota", { _env: entitlementEnvironment() }),
         supabase
           .from("profiles")
           .select("id, email, display_name, plan, plan_started_at")
@@ -236,7 +237,9 @@ export const searchOpportunities = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data: quotaRaw, error: quotaError } = await supabase.rpc("consume_search");
+    const { data: quotaRaw, error: quotaError } = await supabase.rpc("consume_search", {
+      _env: entitlementEnvironment(),
+    });
     if (quotaError) throw new Error(quotaError.message);
     const quotaResult = quotaRaw as unknown as QuotaState & { allowed: boolean };
     if (!quotaResult.allowed) {
@@ -592,9 +595,17 @@ export const changePlan = createServerFn({ method: "POST" })
     z.object({ plan: z.enum(["free", "monthly", "yearly"]) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: quota, error } = await context.supabase.rpc("change_plan", { _plan: data.plan });
-    if (error) throw new Error(error.message);
-    return { quota: quota as unknown as QuotaState, paymentSimulated: data.plan !== "free" };
+    const { data: quota, error } = await context.supabase.rpc("change_plan", {
+      _plan: data.plan,
+      _env: entitlementEnvironment(),
+    });
+    if (error) {
+      if (error.message.includes("plan_requires_payment")) {
+        throw new Error("Los planes de pago se activan al completar el pago.");
+      }
+      throw new Error(error.message);
+    }
+    return { quota: quota as unknown as QuotaState };
   });
 
 // ---------- Perfil y cuenta ----------
@@ -631,6 +642,28 @@ export const deleteAccount = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ confirmation: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
     if (data.confirmation !== "ELIMINAR") throw new Error("Confirmación incorrecta.");
+
+    // Cancelar de inmediato cualquier suscripción para que no se siga cobrando.
+    const { data: subs } = await context.supabase
+      .from("subscriptions")
+      .select("provider_subscription_id, environment, status")
+      .eq("user_id", context.userId);
+    if (subs?.length) {
+      const { createStripeClient } = await import("@/lib/stripe.server");
+      for (const sub of subs) {
+        if (sub.status === "canceled") continue;
+        try {
+          const stripe = createStripeClient(sub.environment as "sandbox" | "live");
+          await stripe.subscriptions.cancel(sub.provider_subscription_id);
+        } catch (cancelError) {
+          console.error("No se pudo cancelar la suscripción al borrar la cuenta", cancelError);
+          throw new Error(
+            "No hemos podido cancelar tu suscripción. Inténtalo de nuevo en unos minutos o contacta con soporte.",
+          );
+        }
+      }
+    }
+
     const { error } = await context.supabase.rpc("delete_my_account");
     if (error) throw new Error(error.message);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -1,14 +1,25 @@
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { StripeCheckoutDialog } from "@/components/StripeCheckoutDialog";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateOverview, useOverview } from "@/hooks/useOverview";
 import { changePlan } from "@/lib/api.functions";
 import { PLANS, type PlanId } from "@/lib/config";
+import { getStripeEnvironment } from "@/lib/stripe";
+import {
+  cancelSubscription,
+  changeSubscriptionPlan,
+  getBillingPortalUrl,
+  getSubscription,
+} from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/planes")({
   head: () => ({
@@ -29,31 +40,179 @@ export const Route = createFileRoute("/_authenticated/planes")({
 
 const ORDER: PlanId[] = ["free", "monthly", "yearly"];
 
+const PRICE_IDS: Record<Exclude<PlanId, "free">, string> = {
+  monthly: "p2plab_premium_monthly",
+  yearly: "p2plab_premium_yearly",
+};
+
 function PlansPage() {
   const { data } = useOverview();
+  const { user } = useAuth();
   const invalidate = useInvalidateOverview();
-  const fn = useServerFn(changePlan);
+  const environment = getStripeEnvironment();
+
+  const downgrade = useServerFn(changePlan);
+  const cancelFn = useServerFn(cancelSubscription);
+  const switchFn = useServerFn(changeSubscriptionPlan);
+  const subscriptionFn = useServerFn(getSubscription);
+  const portalFn = useServerFn(getBillingPortalUrl);
+
   const current = (data?.profile?.plan ?? "free") as PlanId;
 
-  const mutation = useMutation({
-    mutationFn: (plan: PlanId) => fn({ data: { plan } }),
-    onSuccess: (_result, plan) => {
-      toast.success(`Plan ${PLANS[plan].name} activado (pago simulado).`);
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+  const [activating, setActivating] = useState(false);
+
+  const subscription = useQuery({
+    queryKey: ["subscription", environment],
+    queryFn: () => subscriptionFn({ data: { environment } }),
+    staleTime: 15_000,
+  });
+
+  const hasActiveSubscription = Boolean(
+    subscription.data && subscription.data.status !== "canceled",
+  );
+  const pendingCancel = Boolean(subscription.data?.cancel_at_period_end);
+  const isPastDue = subscription.data?.status === "past_due";
+  const pendingPriceId = subscription.data?.pending_price_id ?? null;
+  const pendingPlanName = (Object.keys(PRICE_IDS) as Exclude<PlanId, "free">[]).find(
+    (key) => PRICE_IDS[key] === pendingPriceId,
+  );
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelFn({ data: { environment } }),
+    onSuccess: (result) => {
+      const end = result.current_period_end
+        ? new Date(result.current_period_end).toLocaleDateString("es-ES")
+        : null;
+      toast.success(
+        end
+          ? `Suscripción cancelada. Mantienes tu plan hasta el ${end}.`
+          : "Suscripción cancelada al final del periodo pagado.",
+      );
       invalidate();
+      void subscription.refetch();
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const downgradeMutation = useMutation({
+    mutationFn: () => downgrade({ data: { plan: "free" } }),
+    onSuccess: () => {
+      toast.success("Has vuelto al plan Gratis.");
+      invalidate();
+      void subscription.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const switchMutation = useMutation({
+    mutationFn: (priceId: string) => switchFn({ data: { environment, priceId } }),
+    onSuccess: () => {
+      toast.success("Cambio programado: se aplicará en tu próxima renovación.");
+      void subscription.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const portalMutation = useMutation({
+    mutationFn: () => portalFn({ data: { environment } }),
+    onSuccess: (result) => window.open(result.url, "_blank", "noopener,noreferrer"),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const buy = (plan: Exclude<PlanId, "free">) => {
+    if (!user) return;
+    setCheckoutPriceId(PRICE_IDS[plan]);
+  };
+
+  /** Tras cerrar el pago, esperamos la confirmación del proveedor unos segundos. */
+  const waitForActivation = async () => {
+    setActivating(true);
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const result = await subscription.refetch();
+      const status = result.data?.status;
+      if (status && status !== "canceled" && status !== "incomplete") {
+        invalidate();
+        toast.success("¡Suscripción activada! Ya tienes tu nueva cuota de búsquedas.");
+        setActivating(false);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    setActivating(false);
+    invalidate();
+    toast.info("Estamos confirmando tu pago. Se activará en unos minutos.");
+  };
+
+  const handledReturn = useRef(false);
+  useEffect(() => {
+    if (handledReturn.current || !user) return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get("session_id") && !params.get("checkout")) return;
+    handledReturn.current = true;
+    window.history.replaceState({}, "", "/planes");
+    void waitForActivation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   return (
     <AppShell title="Planes" subtitle="Amplía tu cuota diaria de búsquedas">
       <div className="space-y-5">
-        <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
-          <p className="font-medium">Pagos simulados</p>
-          <p className="mt-1 text-muted-foreground">
-            Todavía no hay cobros reales. Al cambiar de plan activas la cuota correspondiente en
-            modo demostración; no se realiza ningún cargo ni se solicitan datos de pago.
-          </p>
-        </div>
+        <PaymentTestModeBanner />
+
+        {activating && (
+          <div className="surface-card border-primary/40 p-4 text-sm">
+            <p className="font-medium">Confirmando tu pago…</p>
+            <p className="text-muted-foreground">
+              Tu plan se activará en unos segundos. No cierres esta página.
+            </p>
+          </div>
+        )}
+
+        {isPastDue && (
+          <div className="surface-card border-destructive/50 p-4 text-sm">
+            <p className="font-medium text-destructive">No hemos podido cobrar tu renovación</p>
+            <p className="text-muted-foreground">
+              Mantienes tu plan mientras lo reintentamos. Revisa tu método de pago desde «Gestionar
+              suscripción» para no perder el acceso.
+            </p>
+          </div>
+        )}
+
+        {pendingPlanName && (
+          <div className="surface-card p-4 text-sm">
+            <p className="font-medium">Cambio de plan programado</p>
+            <p className="text-muted-foreground">
+              Pasarás a {PLANS[pendingPlanName].name} en tu próxima renovación. Hasta entonces
+              mantienes las ventajas de tu plan actual.
+            </p>
+          </div>
+        )}
+
+        {hasActiveSubscription && (
+          <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+            <div>
+              <p className="font-medium">
+                {pendingCancel ? "Suscripción cancelada" : "Suscripción activa"}
+              </p>
+              <p className="text-muted-foreground">
+                {pendingCancel
+                  ? "Mantienes tu plan hasta el final del periodo pagado"
+                  : `Estado: ${subscription.data?.status}`}
+                {subscription.data?.current_period_end
+                  ? ` · ${pendingCancel ? "Acceso hasta" : "Renovación"}: ${new Date(subscription.data.current_period_end).toLocaleDateString("es-ES")}`
+                  : ""}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              disabled={portalMutation.isPending}
+              onClick={() => portalMutation.mutate()}
+            >
+              Gestionar suscripción
+            </Button>
+          </div>
+        )}
 
         <div className="grid gap-4 lg:grid-cols-3">
           {ORDER.map((id) => {
@@ -84,27 +243,71 @@ function PlansPage() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  className="mt-5 w-full"
-                  variant={isCurrent ? "outline" : id === "free" ? "outline" : "default"}
-                  disabled={isCurrent || mutation.isPending}
-                  onClick={() => mutation.mutate(id)}
-                >
-                  {isCurrent
-                    ? "Plan actual"
-                    : id === "free"
-                      ? "Volver a gratis"
-                      : "Activar (simulado)"}
-                </Button>
+                {id === "free" ? (
+                  <Button
+                    className="mt-5 w-full"
+                    variant="outline"
+                    disabled={
+                      isCurrent ||
+                      pendingCancel ||
+                      cancelMutation.isPending ||
+                      downgradeMutation.isPending
+                    }
+                    onClick={() =>
+                      hasActiveSubscription ? cancelMutation.mutate() : downgradeMutation.mutate()
+                    }
+                  >
+                    {isCurrent
+                      ? "Plan actual"
+                      : hasActiveSubscription
+                        ? "Cancelar suscripción"
+                        : "Volver a gratis"}
+                  </Button>
+                ) : (
+                  <Button
+                    className="mt-5 w-full"
+                    variant={isCurrent ? "outline" : "default"}
+                    disabled={isCurrent || switchMutation.isPending}
+                    onClick={() => {
+                      if (hasActiveSubscription && !pendingCancel) {
+                        switchMutation.mutate(PRICE_IDS[id]);
+                      } else {
+                        buy(id);
+                      }
+                    }}
+                  >
+                    {isCurrent
+                      ? "Plan actual"
+                      : hasActiveSubscription && !pendingCancel
+                        ? `Cambiar a ${plan.name} (al renovar)`
+                        : `Suscribirme por ${plan.price}`}
+                  </Button>
+                )}
               </article>
             );
           })}
         </div>
 
         <p className="text-xs text-muted-foreground">
+          El pago se procesa de forma segura a través de nuestro proveedor de pagos; no almacenamos
+          los datos de tu tarjeta. Puedes cancelar cuando quieras; mantendrás el plan hasta el final
+          del periodo pagado. Los cambios entre Mensual y Anual se aplican en tu próxima renovación,
+          sin cargos parciales.
+        </p>
+        <p className="text-xs text-muted-foreground">
           El paper trading, la cartera, el historial y las estadísticas están disponibles en todos
           los planes, también cuando agotas la cuota de búsquedas.
         </p>
+
+        <StripeCheckoutDialog
+          priceId={checkoutPriceId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCheckoutPriceId(null);
+              void waitForActivation();
+            }
+          }}
+        />
       </div>
     </AppShell>
   );

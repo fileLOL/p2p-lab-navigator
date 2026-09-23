@@ -1,18 +1,21 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   BarChart3,
+  BookOpen,
   CreditCard,
   LayoutDashboard,
   LineChart,
+  Menu,
   Search,
   Shield,
   Wallet,
   LogOut,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -23,9 +26,10 @@ const NAV = [
   { to: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
   { to: "/planes", label: "Planes", icon: CreditCard },
   { to: "/seguridad", label: "Seguridad", icon: Shield },
+  { to: "/guia", label: "Guía", icon: BookOpen },
 ] as const;
 
-const MOBILE_NAV = NAV.slice(0, 5);
+const MOBILE_NAV = NAV.slice(0, 4);
 
 export function AppShell({
   title,
@@ -38,6 +42,7 @@ export function AppShell({
 }) {
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -117,6 +122,47 @@ export function AppShell({
             {item.label}
           </Link>
         ))}
+        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+          <SheetTrigger asChild>
+            <button
+              type="button"
+              className="flex flex-col items-center gap-1 px-1 py-2 text-[11px] text-muted-foreground"
+            >
+              <Menu className="size-5" />
+              Más
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="pb-[env(safe-area-inset-bottom)]">
+            <SheetHeader>
+              <SheetTitle>Menú</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col gap-1 px-4 pb-6">
+              {NAV.slice(4).map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMoreOpen(false)}
+                  className="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent"
+                  activeProps={{ className: "bg-accent text-accent-foreground" }}
+                >
+                  <item.icon className="size-4" />
+                  {item.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false);
+                  void handleSignOut();
+                }}
+                className="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent"
+              >
+                <LogOut className="size-4" />
+                Cerrar sesión
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </nav>
     </div>
   );

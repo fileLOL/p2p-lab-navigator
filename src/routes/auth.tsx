@@ -189,7 +189,7 @@ function SignupForm() {
       toast.success("Cuenta creada. Revisa tu correo para confirmarla.");
       return;
     }
-    toast.success("Cuenta creada. Tienes 20 € de capital virtual.");
+    toast.success("Cuenta creada. Tienes 25.000 € de capital virtual.");
   };
 
   if (checkEmail) {

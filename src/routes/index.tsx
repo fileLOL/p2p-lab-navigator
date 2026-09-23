@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Compara ofertas P2P de criptomonedas de varias plataformas y practica con 20 € de capital virtual. Sin custodia de fondos y sin riesgo.",
+          "Compara ofertas P2P de criptomonedas de varias plataformas y practica con 25.000 € de capital virtual. Sin custodia de fondos y sin riesgo.",
       },
       {
         property: "og:title",
@@ -91,7 +91,7 @@ function Landing() {
             <Step
               icon={<Wallet className="size-5 text-primary" />}
               title="2. Simula la operación"
-              text="Compra o vende con tu capital virtual de 20 €. Tu efectivo, tus posiciones y tu patrimonio se actualizan al instante."
+              text="Compra o vende con tu capital virtual de 25.000 €. Tu efectivo, tus posiciones y tu patrimonio se actualizan al instante."
             />
             <Step
               icon={<BarChart3 className="size-5 text-primary" />}
@@ -159,7 +159,8 @@ function Landing() {
             })}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            Los pagos son simulados durante esta fase: no se realiza ningún cargo.
+            Los planes de pago se contratan con pago seguro y se pueden cancelar cuando quieras. El
+            paper trading siempre usa capital virtual.
           </p>
         </section>
 
@@ -177,8 +178,31 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-6xl space-y-2 px-4 py-8 text-xs text-muted-foreground">
+        <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs text-muted-foreground">
           <p>{GENERAL_DISCLAIMER}</p>
+          <nav className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link to="/guia" className="underline-offset-2 hover:text-foreground hover:underline">
+              Guía de uso
+            </Link>
+            <Link
+              to="/terminos"
+              className="underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Términos y Condiciones
+            </Link>
+            <Link
+              to="/privacidad"
+              className="underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Política de Privacidad
+            </Link>
+            <Link
+              to="/reembolsos"
+              className="underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Política de Reembolsos
+            </Link>
+          </nav>
           <p>
             © {new Date().getFullYear()} P2P Lab. Herramienta educativa de análisis y simulación.
           </p>

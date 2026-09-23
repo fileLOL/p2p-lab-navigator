@@ -93,5 +93,5 @@ export const GENERAL_DISCLAIMER = [
   "Los datos pueden cambiar en cualquier momento.",
   "Los diferenciales no garantizan beneficios.",
   "Las operaciones simuladas no representan rentabilidades futuras.",
-  "Las operaciones reales se realizan fuera de P2P Lab, con el proveedor correspondiente.",
+  "Las operaciones reales se ejecutan en tu propia cuenta del exchange, con tus fondos; P2P Lab nunca custodia dinero.",
 ];

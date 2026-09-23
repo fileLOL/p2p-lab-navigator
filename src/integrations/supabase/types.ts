@@ -95,6 +95,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      exchange_keys: {
+        Row: {
+          api_key: string;
+          api_secret_encrypted: string;
+          created_at: string;
+          exchange: string;
+          id: string;
+          user_id: string;
+        };
+        Insert: {
+          api_key: string;
+          api_secret_encrypted: string;
+          created_at?: string;
+          exchange?: string;
+          id?: string;
+          user_id: string;
+        };
+        Update: {
+          api_key?: string;
+          api_secret_encrypted?: string;
+          created_at?: string;
+          exchange?: string;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       opportunities: {
         Row: {
           amount_max: number | null;
@@ -105,6 +132,7 @@ export type Database = {
           data_mode: string;
           fiat: string;
           id: string;
+          listing_url: string | null;
           location: string | null;
           payment_method: string | null;
           price: number;
@@ -127,6 +155,7 @@ export type Database = {
           data_mode: string;
           fiat: string;
           id?: string;
+          listing_url?: string | null;
           location?: string | null;
           payment_method?: string | null;
           price: number;
@@ -149,6 +178,7 @@ export type Database = {
           data_mode?: string;
           fiat?: string;
           id?: string;
+          listing_url?: string | null;
           location?: string | null;
           payment_method?: string | null;
           price?: number;
@@ -313,6 +343,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      payment_events: {
+        Row: {
+          event_id: string;
+          event_type: string;
+          received_at: string;
+        };
+        Insert: {
+          event_id: string;
+          event_type: string;
+          received_at?: string;
+        };
+        Update: {
+          event_id?: string;
+          event_type?: string;
+          received_at?: string;
+        };
+        Relationships: [];
+      };
+      paypal_plans: {
+        Row: {
+          created_at: string;
+          environment: string;
+          paypal_plan_id: string;
+          paypal_product_id: string;
+          price_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          environment: string;
+          paypal_plan_id: string;
+          paypal_product_id: string;
+          price_id: string;
+        };
+        Update: {
+          created_at?: string;
+          environment?: string;
+          paypal_plan_id?: string;
+          paypal_product_id?: string;
+          price_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           created_at: string;
@@ -321,6 +393,7 @@ export type Database = {
           id: string;
           plan: string;
           plan_started_at: string | null;
+          sandbox_plan: string;
           updated_at: string;
         };
         Insert: {
@@ -330,6 +403,7 @@ export type Database = {
           id: string;
           plan?: string;
           plan_started_at?: string | null;
+          sandbox_plan?: string;
           updated_at?: string;
         };
         Update: {
@@ -339,7 +413,53 @@ export type Database = {
           id?: string;
           plan?: string;
           plan_started_at?: string | null;
+          sandbox_plan?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      real_orders: {
+        Row: {
+          created_at: string;
+          error: string | null;
+          exchange: string;
+          id: string;
+          order_id: string | null;
+          price: number | null;
+          quantity: number;
+          quote_quantity: number | null;
+          side: string;
+          status: string;
+          symbol: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          error?: string | null;
+          exchange?: string;
+          id?: string;
+          order_id?: string | null;
+          price?: number | null;
+          quantity: number;
+          quote_quantity?: number | null;
+          side: string;
+          status?: string;
+          symbol: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          error?: string | null;
+          exchange?: string;
+          id?: string;
+          order_id?: string | null;
+          price?: number | null;
+          quantity?: number;
+          quote_quantity?: number | null;
+          side?: string;
+          status?: string;
+          symbol?: string;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -426,17 +546,80 @@ export type Database = {
         };
         Relationships: [];
       };
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null;
+          created_at: string | null;
+          current_period_end: string | null;
+          current_period_start: string | null;
+          environment: string;
+          id: string;
+          last_event_at: string | null;
+          pending_price_id: string | null;
+          price_id: string;
+          product_id: string;
+          provider: string;
+          provider_customer_id: string;
+          provider_subscription_id: string;
+          status: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          cancel_at_period_end?: boolean | null;
+          created_at?: string | null;
+          current_period_end?: string | null;
+          current_period_start?: string | null;
+          environment?: string;
+          id?: string;
+          last_event_at?: string | null;
+          pending_price_id?: string | null;
+          price_id: string;
+          product_id: string;
+          provider?: string;
+          provider_customer_id: string;
+          provider_subscription_id: string;
+          status?: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          cancel_at_period_end?: boolean | null;
+          created_at?: string | null;
+          current_period_end?: string | null;
+          current_period_start?: string | null;
+          environment?: string;
+          id?: string;
+          last_event_at?: string | null;
+          pending_price_id?: string | null;
+          price_id?: string;
+          product_id?: string;
+          provider?: string;
+          provider_customer_id?: string;
+          provider_subscription_id?: string;
+          status?: string;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      change_plan: { Args: { _plan: string }; Returns: Json };
-      consume_search: { Args: never; Returns: Json };
+      change_plan:
+        | { Args: { _plan: string }; Returns: Json }
+        | { Args: { _env: string; _plan: string }; Returns: Json };
+      consume_search: { Args: never; Returns: Json } | { Args: { _env: string }; Returns: Json };
       current_email_hash: { Args: never; Returns: string };
       delete_my_account: { Args: never; Returns: undefined };
       email_usage_hash: { Args: { _email: string }; Returns: string };
-      get_quota: { Args: never; Returns: Json };
+      get_quota: { Args: never; Returns: Json } | { Args: { _env: string }; Returns: Json };
+      has_active_subscription: {
+        Args: { check_env?: string; user_uuid: string };
+        Returns: boolean;
+      };
       log_action: {
         Args: { _action: string; _metadata?: Json };
         Returns: undefined;
@@ -462,6 +645,7 @@ export type Database = {
         Returns: Json;
       };
       plan_daily_limit: { Args: { _plan: string }; Returns: number };
+      plan_for_env: { Args: { _env: string; _uid: string }; Returns: string };
       refresh_equity: { Args: never; Returns: Json };
     };
     Enums: {

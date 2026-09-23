@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as GuiaRouteImport } from './routes/guia'
 import { Route as OauthCallbackRouteImport } from './routes/oauth-callback'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
+import { Route as ReembolsosRouteImport } from './routes/reembolsos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as AuthenticatedCarteraRouteImport } from './routes/_authenticated/cartera'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEstadisticasRouteImport } from './routes/_authenticated/estadisticas'
@@ -21,6 +25,7 @@ import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedOportunidadesRouteImport } from './routes/_authenticated/oportunidades'
 import { Route as AuthenticatedPlanesRouteImport } from './routes/_authenticated/planes'
 import { Route as AuthenticatedSeguridadRouteImport } from './routes/_authenticated/seguridad'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -36,14 +41,34 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiaRoute = GuiaRouteImport.update({
+  id: '/guia',
+  path: '/guia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OauthCallbackRoute = OauthCallbackRouteImport.update({
   id: '/oauth-callback',
   path: '/oauth-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReembolsosRoute = ReembolsosRouteImport.update({
+  id: '/reembolsos',
+  path: '/reembolsos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedCarteraRoute = AuthenticatedCarteraRouteImport.update({
@@ -84,12 +109,22 @@ const AuthenticatedSeguridadRoute = AuthenticatedSeguridadRouteImport.update({
   path: '/seguridad',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/guia': typeof GuiaRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/privacidad': typeof PrivacidadRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/cartera': typeof AuthenticatedCarteraRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estadisticas': typeof AuthenticatedEstadisticasRoute
@@ -97,12 +132,17 @@ export interface FileRoutesByFullPath {
   '/oportunidades': typeof AuthenticatedOportunidadesRoute
   '/planes': typeof AuthenticatedPlanesRoute
   '/seguridad': typeof AuthenticatedSeguridadRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/guia': typeof GuiaRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/privacidad': typeof PrivacidadRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/cartera': typeof AuthenticatedCarteraRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estadisticas': typeof AuthenticatedEstadisticasRoute
@@ -110,14 +150,19 @@ export interface FileRoutesByTo {
   '/oportunidades': typeof AuthenticatedOportunidadesRoute
   '/planes': typeof AuthenticatedPlanesRoute
   '/seguridad': typeof AuthenticatedSeguridadRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/guia': typeof GuiaRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/privacidad': typeof PrivacidadRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terminos': typeof TerminosRoute
   '/_authenticated/cartera': typeof AuthenticatedCarteraRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estadisticas': typeof AuthenticatedEstadisticasRoute
@@ -125,14 +170,19 @@ export interface FileRoutesById {
   '/_authenticated/oportunidades': typeof AuthenticatedOportunidadesRoute
   '/_authenticated/planes': typeof AuthenticatedPlanesRoute
   '/_authenticated/seguridad': typeof AuthenticatedSeguridadRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/guia'
     | '/oauth-callback'
+    | '/privacidad'
+    | '/reembolsos'
     | '/reset-password'
+    | '/terminos'
     | '/cartera'
     | '/dashboard'
     | '/estadisticas'
@@ -140,12 +190,17 @@ export interface FileRouteTypes {
     | '/oportunidades'
     | '/planes'
     | '/seguridad'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/guia'
     | '/oauth-callback'
+    | '/privacidad'
+    | '/reembolsos'
     | '/reset-password'
+    | '/terminos'
     | '/cartera'
     | '/dashboard'
     | '/estadisticas'
@@ -153,13 +208,18 @@ export interface FileRouteTypes {
     | '/oportunidades'
     | '/planes'
     | '/seguridad'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/guia'
     | '/oauth-callback'
+    | '/privacidad'
+    | '/reembolsos'
     | '/reset-password'
+    | '/terminos'
     | '/_authenticated/cartera'
     | '/_authenticated/dashboard'
     | '/_authenticated/estadisticas'
@@ -167,14 +227,20 @@ export interface FileRouteTypes {
     | '/_authenticated/oportunidades'
     | '/_authenticated/planes'
     | '/_authenticated/seguridad'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  GuiaRoute: typeof GuiaRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
+  PrivacidadRoute: typeof PrivacidadRoute
+  ReembolsosRoute: typeof ReembolsosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TerminosRoute: typeof TerminosRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -200,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guia': {
+      id: '/guia'
+      path: '/guia'
+      fullPath: '/guia'
+      preLoaderRoute: typeof GuiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/oauth-callback': {
       id: '/oauth-callback'
       path: '/oauth-callback'
@@ -207,11 +280,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reembolsos': {
+      id: '/reembolsos'
+      path: '/reembolsos'
+      fullPath: '/reembolsos'
+      preLoaderRoute: typeof ReembolsosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/cartera': {
@@ -263,6 +357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeguridadRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -293,8 +394,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  GuiaRoute: GuiaRoute,
   OauthCallbackRoute: OauthCallbackRoute,
+  PrivacidadRoute: PrivacidadRoute,
+  ReembolsosRoute: ReembolsosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TerminosRoute: TerminosRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

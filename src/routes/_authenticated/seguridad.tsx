@@ -195,7 +195,8 @@ function DeleteAccountSection() {
             Se borran de forma permanente tu perfil, tu cartera virtual, tus operaciones y tu
             historial. No se puede deshacer. Las búsquedas que ya has gastado hoy quedan asociadas a
             tu correo: si te registras de nuevo con el mismo correo, la cuota del día no se
-            reinicia.
+            reinicia. Si tienes una suscripción activa, se cancela en el momento y pierdes el tiempo
+            pagado que te quedaba, sin devolución.
           </p>
         </div>
       </div>
