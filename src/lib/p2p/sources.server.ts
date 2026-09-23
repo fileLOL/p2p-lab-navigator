@@ -1,17 +1,22 @@
 import type { P2PSource, RawOffer, SearchParams, Side, SourceResult } from "./types";
 
 /**
- * Identificadores de método de pago que entiende la API y las URLs de Binance P2P.
- * Un per-aprovar: los nombres amigables (config.ts) no coinciden con los códigos Binance.
+ * Identificadores de método de pago que entiende la API pública de Binance P2P.
+ * Los códigos se obtienen del endpoint `trade-methods` y son sensibles a mayúsculas.
  */
 export const PAYMENT_METHOD_IDENTIFIERS: Record<string, string> = {
   "Transferencia bancaria": "BANK",
   Bizum: "BIZUM",
-  "SEPA instantáneo": "SEPAINSTANT",
+  "SEPA instantáneo": "SEPAinstant",
   Revolut: "Revolut",
   Wise: "Wise",
-  Efectivo: "CASH",
+  Efectivo: "CashDeposit",
 };
+
+/** Devuelve el nombre amigable a partir del identificador devuelto por Binance. */
+const IDENTIFIER_TO_NAME: Record<string, string> = Object.fromEntries(
+  Object.entries(PAYMENT_METHOD_IDENTIFIERS).map(([name, identifier]) => [identifier, name]),
+);
 
 function binanceIdentifier(paymentMethod: string | null | undefined): string | null {
   if (!paymentMethod) return null;
@@ -35,24 +40,19 @@ export function buildBinanceTradeUrl(
 
 /**
  * Enlace directo al anuncio concreto en Binance P2P.
- * Si el anuncio trae identificador del anunciante, se abre su ficha;
- * si no, se abre el listado ya filtrado por activo, moneda, método e importe.
+ * Si el anuncio trae `adNo`, se abre su ficha; si no, el listado filtrado.
  */
-function binanceOfferUrl(params: SearchParams, row: BinanceAdv): string {
-  const advertiserNo = row.advertiser?.userNo;
-  if (advertiserNo) {
-    return `https://p2p.binance.com/es/advertiserDetail?advertiserNo=${encodeURIComponent(advertiserNo)}`;
+function binanceOfferUrl(params: SearchParams, item: BinanceAdItem): string {
+  if (item.adNo) {
+    return `https://p2p.binance.com/es/adv?code=${encodeURIComponent(item.adNo)}`;
   }
   const query = new URLSearchParams({
-    fiat: row.adv?.fiatUnit ?? params.fiat,
-    payment:
-      row.adv?.tradeMethods?.[0]?.identifier ??
-      binanceIdentifier(params.paymentMethod) ??
-      "all-payments",
+    fiat: item.fiat ?? params.fiat,
+    payment: item.tradeMethods?.[0] ?? binanceIdentifier(params.paymentMethod) ?? "all-payments",
   });
   if (params.amount) query.set("amount", String(params.amount));
   const side = params.side === "buy" ? "buy" : "sell";
-  const asset = row.adv?.asset ?? params.asset;
+  const asset = item.asset ?? params.asset;
   return `https://p2p.binance.com/es/trade/${side}/${encodeURIComponent(asset)}?${query.toString()}`;
 }
 
@@ -64,23 +64,26 @@ export const binanceP2PSource: P2PSource = {
   website: "https://p2p.binance.com",
   async fetchOffers(params: SearchParams): Promise<SourceResult> {
     try {
-      const methodIdentifier = binanceIdentifier(params.paymentMethod);
-      const res = await fetch("https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search", {
-        method: "POST",
-        headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify({
-          page: 1,
-          rows: Math.min(20, Math.max(params.limit, 10)),
-          asset: params.asset,
-          fiat: params.fiat,
-          // En Binance "BUY" lista anuncios donde el usuario compra cripto.
-          tradeType: params.side === "buy" ? "BUY" : "SELL",
-          payTypes: methodIdentifier ? [methodIdentifier] : [],
-          countries: [],
-          transAmount: params.amount ? String(params.amount) : "",
-        }),
-        signal: AbortSignal.timeout(12000),
+      const query = new URLSearchParams({
+        fiat: params.fiat,
+        asset: params.asset,
+        tradeType: params.side === "buy" ? "BUY" : "SELL",
+        limit: String(Math.min(20, Math.max(params.limit, 10))),
       });
+      const methodIdentifier = binanceIdentifier(params.paymentMethod);
+      if (methodIdentifier) query.set("tradeMethodIdentifiers", methodIdentifier);
+
+      const res = await fetch(
+        `https://p2p.binance.com/bapi/c2c/v1/public/c2c/agent/ad-list?${query.toString()}`,
+        {
+          headers: {
+            accept: "application/json",
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36",
+          },
+          signal: AbortSignal.timeout(12000),
+        },
+      );
 
       if (!res.ok) {
         return {
@@ -90,28 +93,37 @@ export const binanceP2PSource: P2PSource = {
         };
       }
 
-      const json = (await res.json()) as { data?: BinanceAdv[] };
-      const rows = Array.isArray(json.data) ? json.data : [];
+      const json = (await res.json()) as { data?: { items?: BinanceAdItem[] } };
+      const items = Array.isArray(json.data?.items) ? json.data.items : [];
       const now = new Date().toISOString();
 
-      const offers: RawOffer[] = rows.map((row) => ({
+      const offers: RawOffer[] = items.map((item) => ({
         provider: "binance_p2p",
         providerName: "Binance P2P",
-        asset: row.adv?.asset ?? params.asset,
-        fiat: row.adv?.fiatUnit ?? params.fiat,
+        asset: item.asset ?? params.asset,
+        fiat: item.fiat ?? params.fiat,
         side: params.side,
-        price: Number(row.adv?.price ?? 0),
-        amountMin: row.adv?.minSingleTransAmount ? Number(row.adv.minSingleTransAmount) : null,
-        amountMax: row.adv?.maxSingleTransAmount ? Number(row.adv.maxSingleTransAmount) : null,
-        paymentMethod: row.adv?.tradeMethods?.[0]?.tradeMethodName ?? null,
-        location: row.advertiser?.nickName ? null : null,
-        counterparty: row.advertiser?.nickName ?? null,
-        sourceUrl: binanceOfferUrl(params, row),
+        price: Number(item.price ?? 0),
+        amountMin: item.minTransAmount ? Number(item.minTransAmount) : null,
+        amountMax: item.maxTransAmount ? Number(item.maxTransAmount) : null,
+        paymentMethod:
+          IDENTIFIER_TO_NAME[item.tradeMethods?.[0] ?? ""] ?? item.tradeMethods?.[0] ?? null,
+        location: null,
+        counterparty: item.advertiser?.nickName ?? null,
+        sourceUrl: binanceOfferUrl(params, item),
         timestamp: now,
         dataMode: "real",
       }));
 
-      const valid = offers.filter((o) => o.price > 0);
+      const valid = offers
+        .filter((o) => o.price > 0)
+        .filter(
+          (o) =>
+            !params.amount ||
+            (o.amountMin != null && o.amountMax != null
+              ? params.amount >= o.amountMin && params.amount <= o.amountMax
+              : true),
+        );
       if (valid.length === 0) {
         return { offers: [], status: "available", message: "Sin anuncios para estos filtros." };
       }
@@ -126,16 +138,15 @@ export const binanceP2PSource: P2PSource = {
   },
 };
 
-interface BinanceAdv {
-  adv?: {
-    asset?: string;
-    fiatUnit?: string;
-    price?: string;
-    minSingleTransAmount?: string;
-    maxSingleTransAmount?: string;
-    tradeMethods?: { tradeMethodName?: string; identifier?: string }[];
-  };
-  advertiser?: { nickName?: string; userNo?: string };
+interface BinanceAdItem {
+  adNo?: string;
+  asset?: string;
+  fiat?: string;
+  price?: number;
+  minTransAmount?: number;
+  maxTransAmount?: number;
+  tradeMethods?: string[];
+  advertiser?: { nickName?: string };
 }
 
 /** Plantilla para futuras fuentes que aún requieren credenciales. */
