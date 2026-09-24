@@ -322,10 +322,10 @@ const DEMO_BASE_PRICES: Record<string, number> = {
   USDC: 0.87,
 };
 
+// OKX queda desactivada: sus enlaces de mercado daban 404 / bloqueos.
 export const ALL_SOURCES: P2PSource[] = [
   binanceP2PSource,
   bybitSource,
-  okxSource,
   hodlHodlSource,
   peachSource,
   demoSource,
@@ -334,7 +334,6 @@ export const ALL_SOURCES: P2PSource[] = [
 export const REAL_SOURCES: P2PSource[] = [
   binanceP2PSource,
   bybitSource,
-  okxSource,
   hodlHodlSource,
   peachSource,
 ];
