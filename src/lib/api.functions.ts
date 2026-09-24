@@ -252,7 +252,7 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       };
     }
 
-    const { binanceP2PSource, okxSource, demoSource } = await import("@/lib/p2p/sources.server");
+    const { binanceP2PSource, demoSource } = await import("@/lib/p2p/sources.server");
     const { fetchReferencePrice } = await import("@/lib/p2p/prices.server");
     const { normalizeOffers } = await import("@/lib/p2p/engine");
 
