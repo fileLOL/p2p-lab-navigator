@@ -2,7 +2,15 @@ const STORAGE_KEY = "p2p_lab:provider_leave_dismissed";
 
 export function openProviderUrl(url: string): void {
   if (typeof window === "undefined") return;
-  window.open(url, "_blank", "noopener,noreferrer");
+  // Use a real link click: popup blockers and embedded previews treat it as
+  // a normal user navigation instead of a scripted popup.
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 export function isProviderLeaveDismissed(): boolean {
