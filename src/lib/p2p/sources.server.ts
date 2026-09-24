@@ -213,7 +213,9 @@ export const okxSource: P2PSource = {
       const rows = Array.isArray(json.data?.[okxSide]) ? json.data![okxSide]! : [];
       const limit = Math.min(20, Math.max(params.limit, 10));
       const now = new Date().toISOString();
-      const marketUrl = `https://www.okx.com/p2p-markets/${params.asset.toLowerCase()}-${params.fiat.toLowerCase()}`;
+      // Formato actual de OKX: /p2p-markets/{fiat}/{buy|sell}-{asset} desde el
+      // punto de vista del usuario (p. ej. /p2p-markets/eur/buy-usdt).
+      const marketUrl = `https://www.okx.com/p2p-markets/${params.fiat.toLowerCase()}/${params.side}-${params.asset.toLowerCase()}`;
 
       const offers: RawOffer[] = rows.slice(0, limit).map((row) => ({
         provider: "okx_p2p",
