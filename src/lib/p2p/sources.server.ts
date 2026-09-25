@@ -296,6 +296,16 @@ export const bybitSource: P2PSource = {
         }))
         .filter((o) => o.price > 0);
       if (offers.length === 0) {
+        // Si el importe es demasiado alto, mostramos las mejores ofertas sin ese filtro.
+        if (params.amount) {
+          const retry = await bybitSource.fetchOffers({ ...params, amount: null });
+          if (retry.offers.length > 0) {
+            return {
+              ...retry,
+              message: `Ningún anuncio acepta ${params.amount} ${params.fiat}; se muestran las mejores ofertas con otros límites.`,
+            };
+          }
+        }
         return { offers: [], status: "available", message: "Sin anuncios para estos filtros." };
       }
       return { offers, status: "available" };
