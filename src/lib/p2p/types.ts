@@ -1,6 +1,6 @@
 /**
  * Interfaz común de las fuentes P2P.
- * Cualquier proveedor (Binance P2P, Bybit, OKX, Hodl Hodl, Peach...) debe
+ * Cualquier proveedor (Binance P2P, Bybit, Hodl Hodl, Peach...) debe
  * implementar `P2PSource` para integrarse sin tocar el núcleo del sistema.
  */
 

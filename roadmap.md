@@ -21,3 +21,8 @@
 - [x] Eliminado PayPal del código y de las páginas legales
 - [x] Probado en vista previa: la ventana de pago abre en modo pruebas
 - [ ] Pendiente del usuario: verificación de la cuenta de cobros para activar los cobros reales
+
+## 2026-09-25 — Retirada completa de OKX
+- [x] Eliminado el adaptador de OKX del código; Binance P2P es la única fuente real activa
+- [x] Verificada la base de datos: no quedan ofertas de OKX guardadas
+- [x] Compilación correcta

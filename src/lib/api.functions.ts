@@ -266,7 +266,7 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       limit: MAX_RESULTS_PER_SEARCH,
     };
 
-    const realSources = [binanceP2PSource, okxSource];
+    const realSources = [binanceP2PSource];
     const [reference, ...realResults] = await Promise.all([
       fetchReferencePrice(data.asset, data.fiat),
       ...realSources.map((source) => source.fetchOffers(params)),
