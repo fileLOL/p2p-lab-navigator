@@ -195,14 +195,14 @@ interface BinanceSearchItem {
 }
 
 interface BinanceAdItem {
-  adNo?: string;
-  asset?: string;
-  fiat?: string;
-  price?: number;
-  minTransAmount?: number;
-  maxTransAmount?: number;
-  tradeMethods?: string[];
-  advertiser?: { nickName?: string };
+  adNo?: string | undefined;
+  asset?: string | undefined;
+  fiat?: string | undefined;
+  price?: number | undefined;
+  minTransAmount?: number | undefined;
+  maxTransAmount?: number | undefined;
+  tradeMethods?: string[] | undefined;
+  advertiser?: { nickName?: string | undefined } | undefined;
 }
 
 /** Plantilla para futuras fuentes que aún requieren credenciales. */
