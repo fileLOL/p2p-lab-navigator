@@ -272,14 +272,17 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       ...realSources.map((source) => source.fetchOffers(params)),
     ]);
 
-    const sourceStatus = realSources.map((source, i) => ({
-      key: source.key,
-      name: source.name,
-      status: realResults[i]!.status,
-      message: realResults[i]!.message,
-    }));
-
     let offers = realResults.flatMap((result) => result.offers);
+    const hasRealOffers = offers.length > 0;
+    // Si alguna fuente real trae ofertas, no mostramos errores de las demás.
+    const sourceStatus = realSources
+      .map((source, i) => ({
+        key: source.key,
+        name: source.name,
+        status: realResults[i]!.status,
+        message: realResults[i]!.message,
+      }))
+      .filter((s, i) => !hasRealOffers || realResults[i]!.offers.length > 0);
     let dataMode: "real" | "demo" = "real";
     if (offers.length === 0 && data.allowDemo) {
       const demo = await demoSource.fetchOffers(params);
