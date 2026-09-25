@@ -181,26 +181,6 @@ export const peachSource = pendingSource(
   "Sin API pública estable.",
 );
 
-interface OkxAd {
-  price?: string;
-  quoteMinAmountPerOrder?: string;
-  quoteMaxAmountPerOrder?: string;
-  paymentMethods?: string[];
-  nickName?: string;
-}
-
-const OKX_PAYMENT_METHODS: Record<string, string> = {
-  "Transferencia bancaria": "bank",
-  Bizum: "Bizum",
-  "SEPA instantáneo": "SEPA Instant",
-  Revolut: "Revolut",
-  Wise: "Wise",
-};
-
-function okxPaymentMethod(paymentMethod: string | null | undefined): string {
-  if (!paymentMethod) return "all";
-  return OKX_PAYMENT_METHODS[paymentMethod] ?? "all";
-}
 
 /** Fuente DEMO: datos sintéticos, siempre etiquetados como demo. */
 export const demoSource: P2PSource = {
