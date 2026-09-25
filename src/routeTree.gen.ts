@@ -26,6 +26,7 @@ import { Route as AuthenticatedOportunidadesRouteImport } from './routes/_authen
 import { Route as AuthenticatedPlanesRouteImport } from './routes/_authenticated/planes'
 import { Route as AuthenticatedSeguridadRouteImport } from './routes/_authenticated/seguridad'
 import { Route as AuthenticatedTradingRealRouteImport } from './routes/_authenticated/trading-real'
+import { Route as ApiPublicP2pProbeRouteImport } from './routes/api/public/p2p-probe'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -116,6 +117,11 @@ const AuthenticatedTradingRealRoute =
     path: '/trading-real',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicP2pProbeRoute = ApiPublicP2pProbeRouteImport.update({
+  id: '/api/public/p2p-probe',
+  path: '/api/public/p2p-probe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/planes': typeof AuthenticatedPlanesRoute
   '/seguridad': typeof AuthenticatedSeguridadRoute
   '/trading-real': typeof AuthenticatedTradingRealRoute
+  '/api/public/p2p-probe': typeof ApiPublicP2pProbeRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/planes': typeof AuthenticatedPlanesRoute
   '/seguridad': typeof AuthenticatedSeguridadRoute
   '/trading-real': typeof AuthenticatedTradingRealRoute
+  '/api/public/p2p-probe': typeof ApiPublicP2pProbeRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated/planes': typeof AuthenticatedPlanesRoute
   '/_authenticated/seguridad': typeof AuthenticatedSeguridadRoute
   '/_authenticated/trading-real': typeof AuthenticatedTradingRealRoute
+  '/api/public/p2p-probe': typeof ApiPublicP2pProbeRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/planes'
     | '/seguridad'
     | '/trading-real'
+    | '/api/public/p2p-probe'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/planes'
     | '/seguridad'
     | '/trading-real'
+    | '/api/public/p2p-probe'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/planes'
     | '/_authenticated/seguridad'
     | '/_authenticated/trading-real'
+    | '/api/public/p2p-probe'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -253,6 +265,7 @@ export interface RootRouteChildren {
   ReembolsosRoute: typeof ReembolsosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TerminosRoute: typeof TerminosRoute
+  ApiPublicP2pProbeRoute: typeof ApiPublicP2pProbeRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -377,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTradingRealRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/p2p-probe': {
+      id: '/api/public/p2p-probe'
+      path: '/api/public/p2p-probe'
+      fullPath: '/api/public/p2p-probe'
+      preLoaderRoute: typeof ApiPublicP2pProbeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -422,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReembolsosRoute: ReembolsosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TerminosRoute: TerminosRoute,
+  ApiPublicP2pProbeRoute: ApiPublicP2pProbeRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
