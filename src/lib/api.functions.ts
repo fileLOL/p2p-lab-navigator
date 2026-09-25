@@ -252,7 +252,7 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       };
     }
 
-    const { binanceP2PSource, demoSource } = await import("@/lib/p2p/sources.server");
+    const { binanceP2PSource, bybitSource, demoSource } = await import("@/lib/p2p/sources.server");
     const { fetchReferencePrice } = await import("@/lib/p2p/prices.server");
     const { normalizeOffers } = await import("@/lib/p2p/engine");
 
@@ -266,7 +266,7 @@ export const searchOpportunities = createServerFn({ method: "POST" })
       limit: MAX_RESULTS_PER_SEARCH,
     };
 
-    const realSources = [binanceP2PSource];
+    const realSources = [binanceP2PSource, bybitSource];
     const [reference, ...realResults] = await Promise.all([
       fetchReferencePrice(data.asset, data.fiat),
       ...realSources.map((source) => source.fetchOffers(params)),
